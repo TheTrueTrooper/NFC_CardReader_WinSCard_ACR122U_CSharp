@@ -1,0 +1,5 @@
+C:\Users\Angelo's Tower PC\source\repos\NFC_CardReader\NFC_CardReader\bin\Debug\NFC_CardReader.dll
+C:\Users\Angelo's Tower PC\source\repos\NFC_CardReader\NFC_CardReader\bin\Debug\NFC_CardReader.pdb
+C:\Users\Angelo's Tower PC\source\repos\NFC_CardReader\NFC_CardReader\obj\Debug\NFC_CardReader.csproj.CoreCompileInputs.cache
+C:\Users\Angelo's Tower PC\source\repos\NFC_CardReader\NFC_CardReader\obj\Debug\NFC_CardReader.dll
+C:\Users\Angelo's Tower PC\source\repos\NFC_CardReader\NFC_CardReader\obj\Debug\NFC_CardReader.pdb

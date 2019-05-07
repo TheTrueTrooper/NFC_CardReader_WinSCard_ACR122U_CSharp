@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.168
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NFC_CardReader", "NFC_CardReader\NFC_CardReader.csproj", "{50093CCD-75B1-4C1B-9D68-E08B02C5303A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CardReader_TestConsole", "CardReader_TestConsole\CardReader_TestConsole.csproj", "{33D720CE-2911-4A4D-84E1-9973826000F9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{50093CCD-75B1-4C1B-9D68-E08B02C5303A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{50093CCD-75B1-4C1B-9D68-E08B02C5303A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{50093CCD-75B1-4C1B-9D68-E08B02C5303A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{50093CCD-75B1-4C1B-9D68-E08B02C5303A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{33D720CE-2911-4A4D-84E1-9973826000F9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{33D720CE-2911-4A4D-84E1-9973826000F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{33D720CE-2911-4A4D-84E1-9973826000F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{33D720CE-2911-4A4D-84E1-9973826000F9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {23B6062A-9283-435B-AC1A-CEAD5D7F166B}
+	EndGlobalSection
+EndGlobal

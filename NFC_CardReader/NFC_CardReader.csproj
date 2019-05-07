@@ -1,0 +1,108 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{50093CCD-75B1-4C1B-9D68-E08B02C5303A}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>NFC_CardReader</RootNamespace>
+    <AssemblyName>NFC_CardReader</AssemblyName>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ACR122U\ACR122U_SmartCard.cs" />
+    <Compile Include="ACR122U\ACR122U_ResposeErrorCodes.cs" />
+    <Compile Include="ACR122U\ACR122U_SmartCardException.cs" />
+    <Compile Include="ACR122U\ControlEnums\ACR122U_KeyNumbers.cs" />
+    <Compile Include="ACR122U\ControlEnums\ACR122U_Keys.cs" />
+    <Compile Include="ACR122U\ControlEnums\ACR122U_PICCOperatingParametersControl.cs" />
+    <Compile Include="ACR122U\ControlEnums\ACR122U_LEDControl.cs" />
+    <Compile Include="ACR122U\ControlEnums\ACR122U_BuzzerControl.cs" />
+    <Compile Include="ACR122U\StatusEnums\ACR122U_StatusModulationType.cs" />
+    <Compile Include="ACR122U\StatusEnums\ACR122U_StatusBitsRateInTransmiton.cs" />
+    <Compile Include="ACR122U\StatusEnums\ACR122U_StatusBitRateInReception.cs" />
+    <Compile Include="ACR122U\StatusEnums\ACR122U_StatusErrorCodes.cs" />
+    <Compile Include="CppToCSharpConversionHelpers\CppToCSharpMismatchException.cs" />
+    <Compile Include="CppToCSharpConversionHelpers\CppToCSharpHelpers.cs" />
+    <Compile Include="ReadersCurrentState.cs" />
+    <Compile Include="ShardedCardClasses\BlockTypes\BaseBlock.cs" />
+    <Compile Include="ShardedCardClasses\BlockTypes\Block16NS\SubMemoryTypes\AccessEnums\KeyAndAccessBitsAccessIndexer.cs" />
+    <Compile Include="ShardedCardClasses\BlockTypes\Block16NS\SubMemoryTypes\Block16ApplicationDirectory.cs" />
+    <Compile Include="ShardedCardClasses\BlockTypes\Block16NS\SubMemoryTypes\Block16KeyAndAccessBits.cs" />
+    <Compile Include="ShardedCardClasses\BlockTypes\Block16NS\SubMemoryTypes\Block16KeyAndAccessBitsWithUsableByte.cs" />
+    <Compile Include="ShardedCardClasses\BlockTypes\Block16NS\SubMemoryTypes\Block16ManufacturerData.cs" />
+    <Compile Include="ShardedCardClasses\BlockTypes\Block16NS\Block16SubTypes.cs" />
+    <Compile Include="ShardedCardClasses\BlockTypes\Block16NS\SubMemoryTypes\Block16KeyAndAccessBitsWithGeneralPurposeByte.cs" />
+    <Compile Include="ShardedCardClasses\BlockTypes\Block16NS\SubMemoryTypes\Block16UsableSpace.cs" />
+    <Compile Include="ShardedCardClasses\BlockTypes\Block16NS\SubMemoryTypes\StaticSharedErrors.cs" />
+    <Compile Include="ShardedCardClasses\BlockTypes\BlockTypes.cs" />
+    <Compile Include="ShardedCardClasses\BlockTypes\Block16NS\Block16.cs" />
+    <Compile Include="ShardedCardClasses\SectorTypes\Sector16_16\Sector16_16.cs" />
+    <Compile Include="ShardedCardClasses\SectorTypes\Sector16_16\Sector16_16SubTypes.cs" />
+    <Compile Include="ShardedCardClasses\SectorTypes\Sector16_16\Sector16_16SubTypes\Sector4_16Regular.cs" />
+    <Compile Include="ShardedCardClasses\_CardTypes\BaseCard.cs" />
+    <Compile Include="ShardedCardClasses\_CardTypes\CardTypes.cs" />
+    <Compile Include="ShardedCardClasses\_CardTypes\Mifare\BaseMifareClassic.cs" />
+    <Compile Include="ShardedCardClasses\SectorTypes\BaseSector.cs" />
+    <Compile Include="ShardedCardClasses\SectorTypes\Sector4_16NS\Sector4_16.cs" />
+    <Compile Include="ShardedCardClasses\SectorTypes\Sector4_16NS\Sector4_16SubTypes\Sector4_16Header.cs" />
+    <Compile Include="ShardedCardClasses\SectorTypes\Sector4_16NS\Sector4_16SubTypes\Sector4_16Application.cs" />
+    <Compile Include="ShardedCardClasses\SectorTypes\Sector4_16NS\Sector4_16SubTypes\Sector4_16Regular.cs" />
+    <Compile Include="ShardedCardClasses\SectorTypes\Sector4_16NS\Sector4_16SubTypes.cs" />
+    <Compile Include="ShardedCardClasses\SectorTypes\SectorTypes.cs" />
+    <Compile Include="ShardedCardClasses\_CardTypes\Mifare\MifareClassicSubTypes.cs" />
+    <Compile Include="ShardedCardClasses\_CardTypes\Mifare\MifareSubTypes\MifareClassic4K.cs" />
+    <Compile Include="ShardedCardClasses\_CardTypes\Mifare\MifareSubTypes\MifareClassic2K.cs" />
+    <Compile Include="ShardedCardClasses\_CardTypes\Mifare\MifareSubTypes\MifareClassic1K.cs" />
+    <Compile Include="WinscardDLLCodesAsEnums\ACSIOTLOperations.cs" />
+    <Compile Include="WinscardDLLCodesAsEnums\SmartCardATR.cs" />
+    <Compile Include="WinscardDLLCodesAsEnums\ErrorCodes.cs" />
+    <Compile Include="WinscardDLLCodesAsEnums\SmartCardProtocols.cs" />
+    <Compile Include="WinscardDLLCodesAsEnums\SmartCardStatus.cs" />
+    <Compile Include="WinscardDLLCodesAsEnums\SmartCardShareTypes.cs" />
+    <Compile Include="WinscardDLLCodesAsEnums\SmartCardStates.cs" />
+    <Compile Include="WinSCard.cs" />
+    <Compile Include="WinscardDLLCodesAsEnums\SmartCardMemoryTypes.cs" />
+    <Compile Include="WinscardDLLCodesAsEnums\SmartCardDispostion.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WinscardDLLCodesAsEnums\OperationScopes.cs" />
+    <Compile Include="WinSCardException.cs" />
+    <Compile Include="WinSmartCard.cs" />
+    <Compile Include="WinSmartCardContext.cs" />
+    <Compile Include="WinscardDLLCodesAsEnums\_Notes.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
