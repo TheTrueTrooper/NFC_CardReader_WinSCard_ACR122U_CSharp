@@ -66,8 +66,8 @@ namespace CardReader_TestConsole
             ReadersCurrentState LastState;
 
             ///Again but this time for ever
-            LastState = States[0];
             States[0].CurrentState = States[0].EventState;
+            LastState = States[0];
             while (LastState.EventState == States[0].EventState)
             {
                 Context.GetStatusChange(5000, ref States);
@@ -78,8 +78,9 @@ namespace CardReader_TestConsole
             Console.WriteLine("\t\tStates Current State: " + States[0].CurrentState);
             Console.WriteLine("\t\tStates Changed Reader: " + States[0].ReaderName);
 
-            LastState = States[0];
+            
             States[0].CurrentState = States[0].EventState;
+            LastState = States[0];
             while (LastState.EventState == States[0].EventState)
             {
                 Context.GetStatusChange(5000, ref States);
