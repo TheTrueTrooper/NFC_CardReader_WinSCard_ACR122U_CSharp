@@ -21,7 +21,7 @@ namespace CardReader_TestConsole
             #region ContextGetReaders
             Console.WriteLine("Currently connected readers: ");
             int MaxNumber = 0;
-            List<string> Names = Context.ListReadersAsStrings();
+            List<string> Names = WinSmartCardContext.ListReadersAsStringsStatic();
             foreach (string Reader in Names)
             {
                 Console.WriteLine("\t" + MaxNumber + ":" + Reader);
@@ -36,27 +36,55 @@ namespace CardReader_TestConsole
             {
                 Console.WriteLine("Oops thats not a valid selection number. Try again.");
             }
+
             Console.WriteLine("Testing polling/blocking calls");
             Console.WriteLine("Please change state");
             ReadersCurrentState[] States = new ReadersCurrentState[] { new ReadersCurrentState() { ReaderName = Names[Selection] } };
-            Context.GetStatusChange(100000, ref States);
-            Console.WriteLine("Test 1 Results");
+            Context.GetStatusChange(5000, ref States);
+            Console.WriteLine("Test 1 Results (Init)");
             Console.WriteLine("\t\tStates ATR: " + BitConverter.ToString(States.Last().ATR));
             Console.WriteLine("\t\tStates Event State: " + States[0].EventState);
             Console.WriteLine("\t\tStates Current State: " + States[0].CurrentState);
             Console.WriteLine("\t\tStates Changed Reader: " + States[0].ReaderName);
 
             States[0].CurrentState = States[0].EventState;
-            Context.GetStatusChange(100000, ref States);
-            Console.WriteLine("Test 2 Results");
+            Context.GetStatusChange(5000, ref States);
+            Console.WriteLine("Test 2 Results (with Timeout)");
             Console.WriteLine("\t\tStates ATR: " + BitConverter.ToString(States.Last().ATR));
             Console.WriteLine("\t\tStates Event State: " + States[0].EventState);
             Console.WriteLine("\t\tStates Current State: " + States[0].CurrentState);
             Console.WriteLine("\t\tStates Changed Reader: " + States[0].ReaderName);
 
             States[0].CurrentState = States[0].EventState;
-            Context.GetStatusChange(100000, ref States);
-            Console.WriteLine("Test 3 Results");
+            Context.GetStatusChange(5000, ref States);
+            Console.WriteLine("Test 3 Results (with Timeout)");
+            Console.WriteLine("\t\tStates ATR: " + BitConverter.ToString(States.Last().ATR));
+            Console.WriteLine("\t\tStates Event State: " + States[0].EventState);
+            Console.WriteLine("\t\tStates Current State: " + States[0].CurrentState);
+            Console.WriteLine("\t\tStates Changed Reader: " + States[0].ReaderName);
+
+            ReadersCurrentState LastState;
+
+            ///Again but this time for ever
+            LastState = States[0];
+            States[0].CurrentState = States[0].EventState;
+            while (LastState.EventState == States[0].EventState)
+            {
+                Context.GetStatusChange(5000, ref States);
+            }
+            Console.WriteLine("Test 4 Results (forever)");
+            Console.WriteLine("\t\tStates ATR: " + BitConverter.ToString(States.Last().ATR));
+            Console.WriteLine("\t\tStates Event State: " + States[0].EventState);
+            Console.WriteLine("\t\tStates Current State: " + States[0].CurrentState);
+            Console.WriteLine("\t\tStates Changed Reader: " + States[0].ReaderName);
+
+            LastState = States[0];
+            States[0].CurrentState = States[0].EventState;
+            while (LastState.EventState == States[0].EventState)
+            {
+                Context.GetStatusChange(5000, ref States);
+            }
+            Console.WriteLine("Test 5 Results (forever)");
             Console.WriteLine("\t\tStates ATR: " + BitConverter.ToString(States.Last().ATR));
             Console.WriteLine("\t\tStates Event State: " + States[0].EventState);
             Console.WriteLine("\t\tStates Current State: " + States[0].CurrentState);

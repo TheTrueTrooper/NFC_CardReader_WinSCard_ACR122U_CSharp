@@ -205,13 +205,18 @@ namespace NFC_CardReader
         /// <param name="SendBuff"></param>
         /// <param name="RecvBuff"></param>
         /// <returns></returns>
-        public ErrorCodes CardControl(int Card, uint dwControlCode, byte[] SendBuff, out byte[] RecvBuff)
+        public ErrorCodes Control(byte[] SendCommand, out byte[] ReceivedResponse, OperationScopes Scope = OperationScopes.SCARD_SCOPE_SYSTEM, SmartCardProtocols Protocol = SmartCardProtocols.SCARD_PROTOCOL_UNDEFINED)
         {
-            int pcbBytesReturned = 0;
-            RecvBuff = new byte[256];
-            ErrorCodes Return = WinSCard.SCardControl(Card, dwControlCode, SendBuff, ref RecvBuff, ref pcbBytesReturned);
-            Array.Resize(ref RecvBuff, pcbBytesReturned);
-            return Return;
+            uint IOTL = (int)IOTLOperations.IOCTL_SMARTCARD_DIRECT; // 3225264;
+            ReceivedResponse = new byte[256];
+
+
+            int outBytes = ReceivedResponse.Length;
+            LastResultCode = WinSCard.SCardControl(_Card, IOTL, SendCommand, ref ReceivedResponse, ref outBytes);
+
+            Array.Resize(ref ReceivedResponse, outBytes);
+            //‭‭3136B0‬
+            return LastResultCode;
         }
 
         /// <summary>

@@ -11,7 +11,7 @@ namespace NFC_CardReader
     /// </summary>
     public enum IOTLOperations
     {
-        IOCTL_SMARTCARD_DIRECT = 0x312008,
+        IOCTL_SMARTCARD_DIRECT = 3225264,//0x312008,
         IOCTL_SMARTCARD_SELECT_SLOT = 0x31200C,
         IOCTL_SMARTCARD_DRAW_LCDBMP = 0x312010,
         IOCTL_SMARTCARD_DISPLAY_LCD = 0x312014,

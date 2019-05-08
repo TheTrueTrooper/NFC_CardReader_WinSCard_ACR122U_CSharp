@@ -347,6 +347,8 @@ namespace NFC_CardReader
                     return ("The smart card is not responding to a reset.");
                 case ErrorCodes.SCARD_W_UNSUPPORTED_CARD:
                     return ("The reader cannot communicate with the card, due to ATR string configuration conflicts.");
+                case ErrorCodes.SCARD_E_NO_READERS_AVAILABLE:
+                    return ("There are no avaible smart cards.");
                 default:
                     return ("?");
             }

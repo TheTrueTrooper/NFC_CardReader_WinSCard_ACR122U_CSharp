@@ -9,6 +9,7 @@ namespace NFC_CardReader
     /// <summary>
     /// The posible states that The SmartCard could have
     /// </summary>
+    [Flags]
     public enum SmartCardStates
     {
         /// <summary>

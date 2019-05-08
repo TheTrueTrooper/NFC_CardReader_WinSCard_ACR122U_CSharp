@@ -53,6 +53,8 @@ namespace NFC_CardReader
         SCARD_W_RESET_CARD = -2146435038,
         SCARD_W_REMOVED_CARD = unchecked((int)0x80100069),
 
+        SCARD_E_NO_READERS_AVAILABLE = unchecked((int)0x8010002E),
+
 
         SCARD_S_SUCCESS = 0,
 

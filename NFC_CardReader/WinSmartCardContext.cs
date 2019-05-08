@@ -42,40 +42,38 @@ namespace NFC_CardReader
         }
 
         /// <summary>
-        /// Gets all the reader names with the context of current
-        ///     Context vers
+        /// Transmits a buffer as a command for the ADPU command formate mostly used by the ACR122
         /// </summary>
-        /// <returns>reader names</returns>
-        public List<string> ListReadersAsStrings()
+        /// <param name="SendCommand"></param>
+        /// <param name="ReceivedResponse"></param>
+        /// <param name="Protocol"></param>
+        /// <returns></returns>
+        public static ErrorCodes Control(string Reader, byte[] SendCommand, out byte[] ReceivedResponse, OperationScopes Scope = OperationScopes.SCARD_SCOPE_SYSTEM, SmartCardProtocols Protocol = SmartCardProtocols.SCARD_PROTOCOL_UNDEFINED)
         {
-            int ReaderCount = 0;
-            List<string> AvailableReaderList = new List<string>();
+            int Context = 0;
+            int Card = 0;
+            int AProtocol = 0;
+            uint IOTL = (int)IOTLOperations.IOCTL_SMARTCARD_DIRECT; // 3225264;
+            ReceivedResponse = new byte[256];
 
+            int outBytes = ReceivedResponse.Length;
+            ErrorCodes LastResultCode = WinSCard.SCardEstablishContext(Scope, ref Context);
+            LastResultCode = WinSCard.SCardConnect(Context, Reader, SmartCardShareTypes.SCARD_SHARE_DIRECT, 0, ref Card, ref AProtocol);
+            LastResultCode = WinSCard.SCardControl(Card, IOTL, SendCommand, ref ReceivedResponse, ref outBytes);
+            LastResultCode = WinSCard.SCardDisconnectWrapper(Card, SmartCardDispostion.SCARD_LEAVE_CARD);
+            LastResultCode = WinSCard.SCardReleaseContext(Context);
 
-            //Get count but due to the difference in language get only the count
-            LastResultCode = WinSCard.SCardListReaders(_Context, null, null, ref ReaderCount);
-
-            if (LastResultCode != ErrorCodes.SCARD_S_SUCCESS)
-                throw new WinSCardException(LastResultCode, WinSCard.GetScardErrMsg(LastResultCode) + "\nError perceived durring List Length retrieval");
-
-            //Alot space for the List
-            byte[] ReadersList = new byte[ReaderCount];
-
-            //Fill the list with the actual values
-            LastResultCode = WinSCard.SCardListReaders(_Context, null, ReadersList, ref ReaderCount);
-            if (LastResultCode != ErrorCodes.SCARD_S_SUCCESS)
-                throw new WinSCardException(LastResultCode, WinSCard.GetScardErrMsg(LastResultCode) + "\nError perceived durring Actual List retrieval");
-
-            return CppToCSharpHelpers.ListOfStringsFromNullTerminatedByteBuffer(ReadersList);
-
+            Array.Resize(ref ReceivedResponse, outBytes);
+            //‭‭3136B0‬
+            return LastResultCode;
         }
-
+        
         /// <summary>
         /// Gets all the reader names without a context
         ///     Static Vers
         /// </summary>
         /// <returns>reader names</returns>
-        public static List<string> ListReadersAsStringsStatic()
+        public static List<string> ListReadersAsStringsStatic(bool ThrowOnNoReader = true)
         {
             int ReaderCount = 0;
             List<string> AvailableReaderList = new List<string>();
@@ -84,7 +82,9 @@ namespace NFC_CardReader
             //Get count but due to the difference in language get only the count
             ErrorCodes LastResultCode = WinSCard.SCardListReaders(0, null, null, ref ReaderCount);
 
-            if (LastResultCode != ErrorCodes.SCARD_S_SUCCESS)
+            if (!ThrowOnNoReader && LastResultCode == ErrorCodes.SCARD_E_NO_READERS_AVAILABLE)
+                throw new WinSCardException(LastResultCode, WinSCard.GetScardErrMsg(LastResultCode) + "\nError perceived durring List Length retrieval");
+            else if (LastResultCode != ErrorCodes.SCARD_S_SUCCESS)
                 throw new WinSCardException(LastResultCode, WinSCard.GetScardErrMsg(LastResultCode) + "\nError perceived durring List Count retrieval");
 
             //Alot space for the List
@@ -92,6 +92,38 @@ namespace NFC_CardReader
 
             //Fill the list with the actual values
             LastResultCode = WinSCard.SCardListReaders(0, null, ReadersList, ref ReaderCount);
+            if (LastResultCode != ErrorCodes.SCARD_S_SUCCESS)
+                throw new WinSCardException(LastResultCode, WinSCard.GetScardErrMsg(LastResultCode) + "\nError perceived durring Actual List retrieval");
+
+            return CppToCSharpHelpers.ListOfStringsFromNullTerminatedByteBuffer(ReadersList);
+
+        }
+
+        /// <summary>
+        /// Gets all the reader names with the context of current
+        ///     Context vers
+        /// </summary>
+        /// <returns>reader names</returns>
+        public List<string> ListReadersAsStrings(bool ThrowOnNoReader = true)
+        {
+            int ReaderCount = 0;
+            List<string> AvailableReaderList = new List<string>();
+
+
+            //Get count but due to the difference in language get only the count
+            LastResultCode = WinSCard.SCardListReaders(_Context, null, null, ref ReaderCount);
+
+
+            if(!ThrowOnNoReader && LastResultCode == ErrorCodes.SCARD_E_NO_READERS_AVAILABLE)
+                throw new WinSCardException(LastResultCode, WinSCard.GetScardErrMsg(LastResultCode) + "\nError perceived durring List Length retrieval");
+            else if(LastResultCode != ErrorCodes.SCARD_S_SUCCESS)
+                throw new WinSCardException(LastResultCode, WinSCard.GetScardErrMsg(LastResultCode) + "\nError perceived durring List Length retrieval");
+
+            //Alot space for the List
+            byte[] ReadersList = new byte[ReaderCount];
+
+            //Fill the list with the actual values
+            LastResultCode = WinSCard.SCardListReaders(_Context, null, ReadersList, ref ReaderCount);
             if (LastResultCode != ErrorCodes.SCARD_S_SUCCESS)
                 throw new WinSCardException(LastResultCode, WinSCard.GetScardErrMsg(LastResultCode) + "\nError perceived durring Actual List retrieval");
 
@@ -119,15 +151,15 @@ namespace NFC_CardReader
         /// <param name="ReaderName"></param>
         /// <param name="SmartCardShareTypes"></param>
         /// <returns></returns>
-        public WinSmartCard Connect(string ReaderName, SmartCardShareTypes SmartCardShareTypes)
+        public WinSmartCard Connect(string ReaderName, SmartCardShareTypes SmartCardShareTypes, SmartCardShareTypes ShareType = SmartCardShareTypes.SCARD_SHARE_SHARED, SmartCardProtocols Protocols = SmartCardProtocols.SCARD_PROTOCOL_Any )
         {
 
             ConnectedReaderName = ReaderName;
             int Card = 0;
             int Protocol = 0;
 
-            LastResultCode = WinSCard.SCardConnect(_Context, ConnectedReaderName, SmartCardShareTypes.SCARD_SHARE_SHARED,
-                      SmartCardProtocols.SCARD_PROTOCOL_T0 | SmartCardProtocols.SCARD_PROTOCOL_T1, ref Card, ref Protocol);
+            LastResultCode = WinSCard.SCardConnect(_Context, ConnectedReaderName, ShareType,
+                      Protocols, ref Card, ref Protocol);
 
             if (LastResultCode != ErrorCodes.SCARD_S_SUCCESS)
                 throw new WinSCardException(LastResultCode);
@@ -156,8 +188,6 @@ namespace NFC_CardReader
             LastResultCode = WinSCard.SCardReleaseContext(_Context);
             if (LastResultCode != ErrorCodes.SCARD_S_SUCCESS)
                 throw new WinSCardException(LastResultCode, WinSCard.GetScardErrMsg(LastResultCode) + "\nThrown clean up.");
-            if (Card != null)
-                Card.Dispose();
         }
 
         ~WinSmartCardContext()

@@ -21,6 +21,32 @@ namespace NFC_CardReader.ACR122U
 
         #region DeviceUtilities
 
+        static ACR122U_ResposeErrorCodes RetrieveDataCodesStatic(ref byte[] Data)
+        {
+            byte[] OpReturn = new byte[4] { Data[Data.Length - 1], Data[Data.Length - 2], 0, 0 };
+            byte[] Temp = (byte[])Data.Clone();
+            Array.Copy(Temp, 3, Data, 0, Data.Length - 5);
+            Array.Resize(ref Data, Data.Length - 5);
+            
+            return (ACR122U_ResposeErrorCodes)BitConverter.ToInt32(OpReturn, 0);
+        }
+        //0xd5 0x41 0x27
+        static ACR122U_ResposeErrorCodes RetrieveDataCodesStatic(ref byte[] Data, out byte TrailingResposeData)
+        {
+            byte[] OpReturn = new byte[4] { Data[Data.Length - 1], Data[Data.Length - 2], 0, 0 };
+            byte[] Temp = (byte[])Data.Clone();
+            Array.Copy(Temp, 3, Data, 0, Data.Length - 4);
+            Array.Resize(ref Data, Data.Length - 4);
+            if (OpReturn[1] == 0x90)
+            {
+                TrailingResposeData = OpReturn[0];
+                OpReturn[0] = 0;
+            }
+            else
+                TrailingResposeData = 0;
+            return (ACR122U_ResposeErrorCodes)BitConverter.ToInt32(OpReturn, 0);
+        }
+
         ACR122U_ResposeErrorCodes RetrieveDataCodes(ref byte[] Data)
         {
             byte[] OpReturn = new byte[4] { Data[Data.Length - 1], Data[Data.Length - 2], 0, 0 };
@@ -86,7 +112,222 @@ namespace NFC_CardReader.ACR122U
         }
         #endregion
 
-        #region DeviceSpecificCommands
+        #region DeviceSpecificCommandsPseudoAPDU
+
+        #region CardLessVers
+        /// <summary>
+        /// Turns RFID anntenna On with out need of card
+        /// </summary>
+        /// <returns></returns>
+        public static ACR122U_ResposeErrorCodes TurnAnntennaOnStatic(string Name)
+        {
+            byte[] DataOut;
+
+            byte[] CommandAsBytes = new byte[7] { 0xFF, 0x00, 0x00, 0x00, 0x04, 0xD4, 0x01 };
+
+            WinSmartCardContext.Control(Name, CommandAsBytes, out DataOut);
+
+            return RetrieveDataCodesStatic(ref DataOut);
+        }
+
+        /// <summary>
+        /// Turns RFID anntenna off with out need of card
+        /// </summary>
+        /// <returns></returns>
+        public static ACR122U_ResposeErrorCodes TurnAnntennaOffStatic(string Name)
+        {
+            byte[] DataOut;
+
+            byte[] CommandAsBytes = new byte[7] { 0xFF, 0x00, 0x00, 0x00, 0x04, 0xD4, 0x00 };
+
+            WinSmartCardContext.Control(Name, CommandAsBytes, out DataOut);
+
+            return RetrieveDataCodesStatic(ref DataOut);
+        }
+
+        /// <summary>
+        /// Gets the Opperating params of system
+        /// </summary>
+        /// <param name="DataOut"> A byte as
+        /// [AutoPICCPolling:1=Enable,0=Disable]
+        /// [AutoATSGeneration:1=Enable,0=Disable]
+        /// [PollingInterval:1=250ms,0=500ms]
+        /// [Felica424K:1=Detect,0=Ignore]
+        /// [Felica212K:1=Detect,0=Ignore]
+        /// [Topaz:1=Detect,0=Ignore]
+        /// [ISO14443TypeB:1=Detect,0=Ignore]
+        /// [ISO14443TypeA:1=Detect,0=Ignore]
+        /// </param>
+        /// <returns></returns>
+        public static ACR122U_ResposeErrorCodes GetPICCOperatingParameterStateStatic(string Name, out byte DataOut)
+        {
+            byte[] Data;
+
+            byte[] CommandAsBytes = new byte[5] { 0xFF, 0x00, 0x50, 0x00, 0x00 };
+
+            WinSmartCardContext.Control(Name, CommandAsBytes, out Data);
+
+            return RetrieveDataCodesStatic(ref Data, out DataOut);
+        }
+
+        /// <summary>
+        /// Gets the Opperating params of system
+        /// </summary>
+        /// <param name="DataOut"> A enumerated byte as
+        /// [AutoPICCPolling:1=Enable,0=Disable]
+        /// [AutoATSGeneration:1=Enable,0=Disable]
+        /// [PollingInterval:1=250ms,0=500ms]
+        /// [Felica424K:1=Detect,0=Ignore]
+        /// [Felica212K:1=Detect,0=Ignore]
+        /// [Topaz:1=Detect,0=Ignore]
+        /// [ISO14443TypeB:1=Detect,0=Ignore]
+        /// [ISO14443TypeA:1=Detect,0=Ignore]
+        /// </param>
+        /// <returns></returns>
+        public static ACR122U_ResposeErrorCodes GetPICCOperatingParameterStateStatic(string Name, out ACR122U_PICCOperatingParametersControl SetInDataOut)
+        {
+            byte SetInData;
+            ACR122U_ResposeErrorCodes Return = GetPICCOperatingParameterStateStatic(Name, out SetInData);
+            SetInDataOut = (ACR122U_PICCOperatingParametersControl)SetInData;
+            return Return;
+        }
+
+
+        /// <summary>
+        /// Sets and returns the Opperating params of system with out need of card
+        /// </summary>
+        /// <param name="DataOut"> A byte as
+        /// [AutoPICCPolling:1=Enable,0=Disable]
+        /// [AutoATSGeneration:1=Enable,0=Disable]
+        /// [PollingInterval:1=250ms,0=500ms]
+        /// [Felica424K:1=Detect,0=Ignore]
+        /// [Felica212K:1=Detect,0=Ignore]
+        /// [Topaz:1=Detect,0=Ignore]
+        /// [ISO14443TypeB:1=Detect,0=Ignore]
+        /// [ISO14443TypeA:1=Detect,0=Ignore]
+        /// </param>
+        /// <returns></returns>
+        public static ACR122U_ResposeErrorCodes SetPICCOperatingParameterStateStatic(string Name, ref byte SetInDataOut)
+        {
+            byte[] Data;
+
+            byte[] CommandAsBytes = new byte[5] { 0xFF, 0x00, 0x51, SetInDataOut, 0x00 };
+
+            WinSmartCardContext.Control(Name, CommandAsBytes, out Data);
+
+            return RetrieveDataCodesStatic(ref Data, out SetInDataOut);
+        }
+
+        /// <summary>
+        /// Sets and returns the Opperating params of system with out need of card
+        /// </summary>
+        /// <param name="DataOut"> A enumerated byte as
+        /// [AutoPICCPolling:1=Enable,0=Disable]
+        /// [AutoATSGeneration:1=Enable,0=Disable]
+        /// [PollingInterval:1=250ms,0=500ms]
+        /// [Felica424K:1=Detect,0=Ignore]
+        /// [Felica212K:1=Detect,0=Ignore]
+        /// [Topaz:1=Detect,0=Ignore]
+        /// [ISO14443TypeB:1=Detect,0=Ignore]
+        /// [ISO14443TypeA:1=Detect,0=Ignore]
+        /// </param>
+        /// <returns></returns>
+        public static ACR122U_ResposeErrorCodes SetPICCOperatingParameterStateStatic(string Name, ref ACR122U_PICCOperatingParametersControl SetInDataOut)
+        {
+            byte SetInData = (byte)SetInDataOut;
+            ACR122U_ResposeErrorCodes Return = SetPICCOperatingParameterStateStatic(Name, ref SetInData);
+            SetInDataOut = (ACR122U_PICCOperatingParametersControl)SetInData;
+            return Return;
+        }
+
+        /// <summary>
+        /// Sets the buzzer and LEDs to work in a T1 and T2 cycle like in a alarm with out need for card
+        /// </summary>
+        /// <param name="LEDControl"> A enumberated byte as
+        /// [GreenBlinkingMask(0x80):1=Blink,0=Dont]
+        /// [RedBlinkingMask(0x40):1=Blink,0=Dont]
+        /// [InitialGreenBlinkingState(0x20):1=On,0=Off]
+        /// [InitialRedBlinkingState(0x10):1=On,0=Off]
+        /// [GreenLEDStateMask(0x08):1=Update,0=Dont]
+        /// [RedLEDStateMask(0x04):1=Update,0=Dont]    
+        /// [GreenFinalState(0x02):1=On,0=Off]
+        /// [BuzzerOnT1Cycle(0x02):1=On,0=Off]
+        /// [RedFinalState(0x01):1=On,0=Off]   </param>
+        /// <param name="T1Duration">T1Duration byte(as value x 100ms)</param>
+        /// <param name="T2Durration">T2Duration byte(as value x 100ms)</param>
+        /// <param name="TimesToRepeat">The Number of times that It sould repeat both cycles</param>
+        /// <param name="BuzzerControl"></param> A enumberated byte as
+        /// [BuzzerOnT1Cycle(0x02):1=On,0=Off]
+        /// [RedFinalState(0x01):1=On,0=Off]
+        /// [BuzzerOnT12Cycle(0x01):1=On,0=Off]
+        /// <param name="DataOut">Some strange data that to this day I'm not sure of is incons only consi is the card comes on and of is +1</param>
+        /// <returns></returns>
+        public static ACR122U_ResposeErrorCodes SetLEDandBuzzerControlStatic(string Name, ACR122U_LEDControl LEDControl, byte T1Duration, byte T2Durration, byte TimesToRepeat, ACR122U_BuzzerControl BuzzerControl, out byte DataOut)
+        {
+            if (!Enum.IsDefined(typeof(ACR122U_BuzzerControl), BuzzerControl))
+                throw new Exception("Your BuzzerControl selection was not valid.");
+
+            byte[] Data;
+
+            byte[] CommandAsBytes = new byte[8] { 0xFF, 0x00, 0x40, (byte)LEDControl, 0x04, T1Duration, T1Duration, (byte)BuzzerControl };
+
+            WinSmartCardContext.Control(Name, CommandAsBytes, out Data);
+
+            return RetrieveDataCodesStatic(ref Data, out DataOut);
+        }
+
+        /// <summary>
+        /// Gets the Status from the ACR122 using its internal method
+        /// </summary>
+        /// <param name="Card"></param>
+        /// <param name="ErrorCode"></param>
+        /// <param name="FieldPresent"></param>
+        /// <param name="NumberOfTargets"></param>
+        /// <param name="LogicalNumber"></param>
+        /// <param name="BitRateInReception"></param>
+        /// <param name="BitRateInTransmition"></param>
+        /// <param name="ModulationType"></param>
+        /// <returns></returns>
+        public static ACR122U_ResposeErrorCodes GetStatusStatic(string Name, out bool Card, out ACR122U_StatusErrorCodes ErrorCode, out bool FieldPresent, out byte NumberOfTargets, out byte LogicalNumber, out ACR122U_StatusBitRateInReception BitRateInReception, out ACR122U_StatusBitsRateInTransmiton BitRateInTransmition, out ACR122U_StatusModulationType ModulationType)
+        {
+            byte[] Data;
+
+            byte[] CommandAsBytes = new byte[] { 0xFF, 0x00, 0x00, 0x00, 0x02, 0xD4, 0x04 };
+
+            WinSmartCardContext.Control(Name, CommandAsBytes, out Data);
+
+            ErrorCode = (ACR122U_StatusErrorCodes)Data[2];
+            FieldPresent = Data[3] != 0;
+            NumberOfTargets = Data[4];
+            if (Data[9] == 0x80 && Data[10] == 0x90 && Data[11] == 0x00)
+            {
+                Card = true;
+                LogicalNumber = Data[5];
+                BitRateInReception = (ACR122U_StatusBitRateInReception)Data[6];
+                BitRateInTransmition = (ACR122U_StatusBitsRateInTransmiton)Data[7];
+                ModulationType = (ACR122U_StatusModulationType)Data[8];
+
+                return ACR122U_ResposeErrorCodes.Success;
+            }
+            else if (Data[5] == 0x80 && Data[6] == 0x90 && Data[7] == 0x00)
+            {
+                Card = false;
+                LogicalNumber = 0;
+                BitRateInReception = ACR122U_StatusBitRateInReception.NoReception;
+                BitRateInTransmition = ACR122U_StatusBitsRateInTransmiton.NoTransmiton;
+                ModulationType = ACR122U_StatusModulationType.NoCardDetected;
+
+                return ACR122U_ResposeErrorCodes.Success;
+            }
+
+            Card = false;
+            LogicalNumber = 0;
+            BitRateInReception = ACR122U_StatusBitRateInReception.NoReception;
+            BitRateInTransmition = ACR122U_StatusBitsRateInTransmiton.NoTransmiton;
+            ModulationType = ACR122U_StatusModulationType.NoCardDetected;
+            return RetrieveDataCodesStatic(ref Data);
+        }
+        #endregion
 
         /*Turn On/Off anntenna (Couldnt Figure out what this was actually doing out actually)
         *Send 
@@ -101,10 +342,8 @@ namespace NFC_CardReader.ACR122U
         public ACR122U_ResposeErrorCodes TurnAnntennaOn()
         {
             byte[] DataOut;
-            const ulong _TurnAnntennaOn = 0xFF00000004D40100;
-            byte[] CommandAsBytes = BitConverter.GetBytes(_TurnAnntennaOn);
-            Array.Reverse(CommandAsBytes);
-            Array.Resize(ref CommandAsBytes, 7);
+
+            byte[] CommandAsBytes = new byte[7] { 0xFF, 0x00, 0x00, 0x00, 0x04, 0xD4, 0x01 };
 
             TransmitData(CommandAsBytes, out DataOut);
 
@@ -124,10 +363,8 @@ namespace NFC_CardReader.ACR122U
         public ACR122U_ResposeErrorCodes TurnAnntennaOff()
         {
             byte[] DataOut;
-            const ulong _TurnAnntennaOff = 0xFF00000004D40000;
-            byte[] CommandAsBytes = BitConverter.GetBytes(_TurnAnntennaOff);
-            Array.Reverse(CommandAsBytes);
-            Array.Resize(ref CommandAsBytes, 7);
+
+            byte[] CommandAsBytes = new byte[7] { 0xFF, 0x00, 0x00, 0x00, 0x04, 0xD4, 0x00 };
 
             TransmitData(CommandAsBytes, out DataOut);
 
@@ -166,10 +403,8 @@ namespace NFC_CardReader.ACR122U
         public ACR122U_ResposeErrorCodes GetPICCOperatingParameterState(out byte DataOut)
         {
             byte[] Data;
-            const ulong _GetPICCOperatingParameterState = 0xFF00500000000000;
-            byte[] CommandAsBytes = BitConverter.GetBytes(_GetPICCOperatingParameterState);
-            Array.Reverse(CommandAsBytes);
-            Array.Resize(ref CommandAsBytes, 5);
+
+            byte[] CommandAsBytes = new byte[5] { 0xFF, 0x00, 0x50, 0x00, 0x00 };
 
             TransmitData(CommandAsBytes, out Data);
 
@@ -231,13 +466,8 @@ namespace NFC_CardReader.ACR122U
         public ACR122U_ResposeErrorCodes SetPICCOperatingParameterState(ref byte SetInDataOut)
         {
             byte[] Data;
-            const ulong _SetPICCOperatingParameterState = 0xFF00510000000000;
-            //                                 Set All On 0xFF0051FF00000000;//Sets all off (build up with use of above enum)
-            //                                       FF<<32  =|   FF00000000;
-            ulong SetPICCOperatingParameterState = _SetPICCOperatingParameterState | ((ulong)SetInDataOut << 32);
-            byte[] CommandAsBytes = BitConverter.GetBytes(SetPICCOperatingParameterState);
-            Array.Reverse(CommandAsBytes);
-            Array.Resize(ref CommandAsBytes, 5);
+
+            byte[] CommandAsBytes = new byte[5] { 0xFF, 0x00, 0x51, SetInDataOut, 0x00 };
 
             TransmitData(CommandAsBytes, out Data);
 
@@ -306,18 +536,12 @@ namespace NFC_CardReader.ACR122U
         /// <returns></returns>
         public ACR122U_ResposeErrorCodes SetLEDandBuzzerControl(ACR122U_LEDControl LEDControl, byte T1Duration, byte T2Durration, byte TimesToRepeat, ACR122U_BuzzerControl BuzzerControl, out byte DataOut)
         {
-            byte[] Data;
-            const ulong _SetLEDandBuzzerControl = 0xFF00400004000000;//current state sets all off.     
-            //    Set All On with Max time |0xFF0040FF04FFFF03;//Sets all off (build up with use of above enums and time input)
-            ulong SetLEDandBuzzerControl = _SetLEDandBuzzerControl;
-            SetLEDandBuzzerControl |= ((ulong)LEDControl) << 32;
-            SetLEDandBuzzerControl |= ((ulong)T1Duration) << 16;
-            SetLEDandBuzzerControl |= ((ulong)T1Duration) << 8;
-            SetLEDandBuzzerControl |= (ulong)BuzzerControl;
+            if (!Enum.IsDefined(typeof(ACR122U_BuzzerControl), BuzzerControl))
+                throw new Exception("Your BuzzerControl selection was not valid.");
 
-            byte[] CommandAsBytes = BitConverter.GetBytes(SetLEDandBuzzerControl);
-            Array.Reverse(CommandAsBytes);
-            Array.Resize(ref CommandAsBytes, 8);
+            byte[] Data;
+
+            byte[] CommandAsBytes = new byte[8] { 0xFF, 0x00, 0x40, (byte)LEDControl, 0x04, T1Duration, T1Duration, (byte)BuzzerControl };
 
             TransmitData(CommandAsBytes, out Data);
 
@@ -358,15 +582,11 @@ namespace NFC_CardReader.ACR122U
         public ACR122U_ResposeErrorCodes GetStatus(out bool Card, out ACR122U_StatusErrorCodes ErrorCode, out bool FieldPresent, out byte NumberOfTargets, out byte LogicalNumber, out ACR122U_StatusBitRateInReception BitRateInReception, out ACR122U_StatusBitsRateInTransmiton BitRateInTransmition, out ACR122U_StatusModulationType ModulationType)
         {
             byte[] Data;
-            const ulong _GetStatus = 0xFF00000002D40400;
-            byte[] CommandAsBytes = BitConverter.GetBytes(_GetStatus);
-            Array.Reverse(CommandAsBytes);
-            Array.Resize(ref CommandAsBytes, 7);
+
+            byte[] CommandAsBytes = new byte[] { 0xFF, 0x00, 0x00, 0x00, 0x02, 0xD4, 0x04 }; 
 
             TransmitData(CommandAsBytes, out Data);
-            //D5 05[ErrorCode][Field][NumberOfTargets][LogicalNumber][BitRateInReception][BitRateInTransmission][ModulationType] 80 90 00
-            //D5 05[00][00][00][00][00][00][00] 80 90 00 Card
-            //D5 05 00 00 00 80 90 00 00 00 00 00 no Card
+
             ErrorCode = (ACR122U_StatusErrorCodes)Data[2];
             FieldPresent = Data[3] != 0;
             NumberOfTargets = Data[4];
@@ -396,13 +616,8 @@ namespace NFC_CardReader.ACR122U
             BitRateInReception = ACR122U_StatusBitRateInReception.NoReception;
             BitRateInTransmition = ACR122U_StatusBitsRateInTransmiton.NoTransmiton;
             ModulationType = ACR122U_StatusModulationType.NoCardDetected;
-            return RetrieveDataCodes(ref Data); //RetrieveDataCodes(ref DataOut);
+            return RetrieveDataCodes(ref Data); 
         }
-
-
-
-
-        const ulong _GetStatus = 0xFF00000002D40400;
 
         #endregion
         #region CardCommandsAllFor1KForNow
@@ -420,10 +635,7 @@ namespace NFC_CardReader.ACR122U
         /// <returns></returns>
         public ACR122U_ResposeErrorCodes GetcardUIDBytes(out byte[] receivedUID)//only for mifare 1k cards
         {
-            const ulong _GetcardUIDBytesCommand = 0xFFCA000000000000;
-            byte[] CommandAsBytes = BitConverter.GetBytes(_GetcardUIDBytesCommand);
-            Array.Reverse(CommandAsBytes);
-            Array.Resize(ref CommandAsBytes, 5);
+            byte[] CommandAsBytes = new byte[] { 0xFF, 0xCA, 0x00, 0x00, 0x00 };
 
             TransmitData(CommandAsBytes, out receivedUID);
 
@@ -445,7 +657,7 @@ namespace NFC_CardReader.ACR122U
             if (LastACRResultCode != ACR122U_ResposeErrorCodes.Success)
                 throw new ACR122U_SmartCardException(LastACRResultCode, LastResultCode);
 
-            cardUID = BitConverter.ToString(receivedUID);  //CppToCSharpHelpers.StringsFromNullTerminatedByteBuffer(receivedUID);
+            cardUID = BitConverter.ToString(receivedUID);  
 
             return cardUID;
         }
@@ -463,10 +675,8 @@ namespace NFC_CardReader.ACR122U
          /// <returns></returns>
         public ACR122U_ResposeErrorCodes GetcardATSBytes(out byte[] receivedUID)//only for mifare 1k cards
         {
-            const ulong _GetcardUIDBytesCommand = 0xFFCA010000000000;
-            byte[] CommandAsBytes = BitConverter.GetBytes(_GetcardUIDBytesCommand);
-            Array.Reverse(CommandAsBytes);
-            Array.Resize(ref CommandAsBytes, 5);
+
+            byte[] CommandAsBytes = new byte[5] { 0xFF, 0xCA, 0x01, 0x00, 0x00 };
 
             TransmitData(CommandAsBytes, out receivedUID);
 
@@ -489,7 +699,7 @@ namespace NFC_CardReader.ACR122U
             if (LastACRResultCode != ACR122U_ResposeErrorCodes.Success)
                 throw new ACR122U_SmartCardException(LastACRResultCode, LastResultCode);
 
-            cardUID = BitConverter.ToString(receivedUID);  //CppToCSharpHelpers.StringsFromNullTerminatedByteBuffer(receivedUID);
+            cardUID = BitConverter.ToString(receivedUID);  
 
             return cardUID;
         }
@@ -511,19 +721,12 @@ namespace NFC_CardReader.ACR122U
         public ACR122U_ResposeErrorCodes LoadAthenticationKeys(ACR122U_KeyMemories Key, byte[] KeyValue)//only for mifare 1k cards
         {
             byte[] Return;
+            if (!Enum.IsDefined(typeof(ACR122U_KeyMemories), Key))
+                throw new Exception("Your Key Load location is not a valid one.");
             if (KeyValue.Length != 6)
                 throw new Exception("Your Key has too many or too few bites.\nKeys must have 6 bytes.");
-            const ulong _GetcardUIDBytesCommand = 0xFF82000006000000;
-            byte[] CommandAsBytes = BitConverter.GetBytes(_GetcardUIDBytesCommand);
-            Array.Reverse(CommandAsBytes);
-            Array.Resize(ref CommandAsBytes, 11);
-            CommandAsBytes[3] = (byte)Key;
-            CommandAsBytes[5] = KeyValue[0];
-            CommandAsBytes[6] = KeyValue[1];
-            CommandAsBytes[7] = KeyValue[2];
-            CommandAsBytes[8] = KeyValue[3];
-            CommandAsBytes[9] = KeyValue[4];
-            CommandAsBytes[10] = KeyValue[5];
+
+            byte[] CommandAsBytes = new byte[11] { 0xFF, 0x82, 0x00, (byte)Key, 0x06, KeyValue[0], KeyValue[1], KeyValue[2], KeyValue[3], KeyValue[4], KeyValue[5] };
 
             TransmitData(CommandAsBytes, out Return);
 
@@ -538,6 +741,9 @@ namespace NFC_CardReader.ACR122U
         /// <returns></returns>
         public ACR122U_ResposeErrorCodes LoadAthenticationKeys(ACR122U_Keys Key, byte[] KeyValue)
         {
+            if(!Enum.IsDefined(typeof(ACR122U_Keys), Key))
+                throw new Exception("Your Key Selection is not a valid one.");
+
             return LoadAthenticationKeys((ACR122U_KeyMemories)Key, KeyValue);
         }
 
@@ -545,7 +751,7 @@ namespace NFC_CardReader.ACR122U
         *Send 
         FF 86 00 00 05 01 00 00 60 01
         or
-        FF 86 00 00 05 01 [Block:00-FF] 6{000<KeyType:0=A,1=B>} [KeyNumber:00-01]
+        FF 86 00 00 05 01 00 [Block:00-FF] 6{000<KeyType:0=A,1=B>} [KeyNumber:00-01]
         *Returns
         90 00
         Note in a 4 block sector the last block is the key block
@@ -558,14 +764,14 @@ namespace NFC_CardReader.ACR122U
         /// <returns></returns>
         public ACR122U_ResposeErrorCodes Athentication(byte BlockToAthenticate, ACR122U_Keys Key, ACR122U_KeyMemories KeyToUse)
         {
-            byte[] Return;//                        FF860000050100006001
-            const ulong _GetcardUIDBytesCommand = 0xFF86000005010000;
-            byte[] CommandAsBytes = BitConverter.GetBytes(_GetcardUIDBytesCommand);
-            Array.Reverse(CommandAsBytes);
-            Array.Resize(ref CommandAsBytes, 10);
-            CommandAsBytes[6] = BlockToAthenticate;
-            CommandAsBytes[8] = (byte)(0x60 | (byte)Key);
-            CommandAsBytes[9] = (byte)KeyToUse; 
+            if (!Enum.IsDefined(typeof(ACR122U_KeyMemories), KeyToUse))
+                throw new Exception("Your Key Load location is not a valid one.");
+            if (!Enum.IsDefined(typeof(ACR122U_Keys), Key))
+                throw new Exception("Your Key Selection is not a valid one.");
+
+            byte[] Return;
+
+            byte[] CommandAsBytes = new byte[10] { 0xFF, 0x86, 0x00, 0x00, 0x05, 0x01, 0x00, BlockToAthenticate, (byte)(0x60 | (byte)Key), (byte)KeyToUse }; 
 
             TransmitData(CommandAsBytes, out Return);
 
@@ -580,6 +786,10 @@ namespace NFC_CardReader.ACR122U
         /// <returns></returns>
         public ACR122U_ResposeErrorCodes Athentication(byte BlockToAthenticate, ACR122U_Keys Key, ACR122U_Keys KeyToUse)
         {
+            if (!Enum.IsDefined(typeof(ACR122U_Keys), KeyToUse))
+                throw new Exception("Your Key Selection for KeyToUse is not a valid one.");
+            if (!Enum.IsDefined(typeof(ACR122U_Keys), Key))
+                throw new Exception("Your Key Selection for Key is not a valid one.");
             return Athentication( BlockToAthenticate, Key, (ACR122U_KeyMemories)KeyToUse);
         }
 
@@ -602,12 +812,8 @@ namespace NFC_CardReader.ACR122U
         {
             if (NumberToRead > 16 || NumberToRead < 0)// only one they let you with? :-/
                 throw new Exception("Your Data In has too or too few bites.\nRead commands must have 0-16 bytes.");
-            const ulong _GetcardUIDBytesCommand = 0xFFB0000000000000;
-            byte[] CommandAsBytes = BitConverter.GetBytes(_GetcardUIDBytesCommand);
-            Array.Reverse(CommandAsBytes);
-            Array.Resize(ref CommandAsBytes, 5);
-            CommandAsBytes[3] = BlockToRead;
-            CommandAsBytes[4] = NumberToRead;
+
+            byte[] CommandAsBytes = new byte[5] { 0xFF, 0xB0, 0x00, BlockToRead, NumberToRead };
 
             TransmitData(CommandAsBytes, out DataOut);
 
@@ -616,9 +822,9 @@ namespace NFC_CardReader.ACR122U
 
         /*WriteBlock
         *Send 
-        FF B0 00 51 10
+        FF B0 00 51 10 FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF
         or
-        FF 86 00 00 [Block:00-FF] 6{000<KeyType:0=A,1=B>} [KeyNumber:00-01]
+        FF B0 00 51 10 [Data]...
         *Returns
         90 00
         */
@@ -633,18 +839,8 @@ namespace NFC_CardReader.ACR122U
             byte[] Return;
             if (DataIn.Length != 16)
                 throw new Exception("Your Data In has too or too few bites.\nWrite commands must have 16 bytes.");
-            const ulong _GetcardUIDBytesCommand = 0xFFB0000000000000;
-            byte[] CommandAsBytes = BitConverter.GetBytes(_GetcardUIDBytesCommand);
-            Array.Reverse(CommandAsBytes);
-            Array.Resize(ref CommandAsBytes, 5 + DataIn.Length);
-            CommandAsBytes[3] = BlockToWrite;
-            CommandAsBytes[4] = (byte)DataIn.Length;
-            int i = 0;
-            foreach(byte b in DataIn)
-            {
-                CommandAsBytes[5 + i] = DataIn[i];
-                i += 1;
-            }
+
+            byte[] CommandAsBytes = new byte[21] { 0xFF, 0xB0, 0x00, BlockToWrite, 0x10, DataIn[0], DataIn[1], DataIn[2], DataIn[3], DataIn[4], DataIn[5], DataIn[6], DataIn[7], DataIn[8], DataIn[9], DataIn[10], DataIn[11], DataIn[12], DataIn[13], DataIn[14], DataIn[15] }; 
 
             TransmitData(CommandAsBytes, out Return);
             return RetrieveDataCodes(ref Return);
@@ -668,16 +864,13 @@ namespace NFC_CardReader.ACR122U
         {
             ACR122U_ResposeErrorCodes Return;
             byte[] DataBack;
-            //                                      FFD700000500FFFFFFFF
-            const ulong _GetcardUIDBytesCommand = 0xFFD700000500000;
-            byte[] CommandAsBytes = BitConverter.GetBytes(_GetcardUIDBytesCommand);
-            Array.Reverse(CommandAsBytes);
-            Array.Resize(ref CommandAsBytes, 5);
-            CommandAsBytes[3] = BlockToRead;
+
+            byte[] CommandAsBytes = new byte[5] { 0xFF, 0xB1, 0x00, BlockToRead, 0x04 };
 
             TransmitData(CommandAsBytes, out DataBack);
             Return = RetrieveDataCodes(ref DataBack);
-            Array.Reverse(DataBack);
+            if (BitConverter.IsLittleEndian)
+                Array.Reverse(DataBack);
             Value = BitConverter.ToInt16(DataBack, 0);
             return Return;
         }
@@ -700,17 +893,11 @@ namespace NFC_CardReader.ACR122U
         {
             byte[] Return;
             byte[] ValuesBytes;
-            //                                      FFD700000500FFFFFFFF
-            const ulong _GetcardUIDBytesCommand = 0xFFD700000500000;
-            byte[] CommandAsBytes = BitConverter.GetBytes(_GetcardUIDBytesCommand);
-            Array.Reverse(CommandAsBytes);
-            Array.Resize(ref CommandAsBytes, 10);
             ValuesBytes = BitConverter.GetBytes(Value);
-            CommandAsBytes[3] = BlockToWrite;
-            CommandAsBytes[6] = ValuesBytes[3];
-            CommandAsBytes[7] = ValuesBytes[2];
-            CommandAsBytes[8] = ValuesBytes[1];
-            CommandAsBytes[9] = ValuesBytes[0];
+            if (BitConverter.IsLittleEndian)
+                Array.Reverse(ValuesBytes);
+
+            byte[] CommandAsBytes = new byte[10] { 0xFF, 0xD7, 0x00, BlockToWrite, 0x05, 0x00, ValuesBytes[0], ValuesBytes[1], ValuesBytes[2], ValuesBytes[3] };//BitConverter.GetBytes(_GetcardUIDBytesCommand);
 
             TransmitData(CommandAsBytes, out Return);
             return RetrieveDataCodes(ref Return);
@@ -733,18 +920,11 @@ namespace NFC_CardReader.ACR122U
         public ACR122U_ResposeErrorCodes IncrementValue(short Value, byte BlockToIncrement)
         {
             byte[] Return;
-            byte[] ValuesBytes;
-            //                                      FFD700000501FFFFFFFF
-            const ulong _GetcardUIDBytesCommand = 0xFFD700000501000;
-            byte[] CommandAsBytes = BitConverter.GetBytes(_GetcardUIDBytesCommand);
-            Array.Reverse(CommandAsBytes);
-            Array.Resize(ref CommandAsBytes, 10);
-            ValuesBytes = BitConverter.GetBytes(Value);
-            CommandAsBytes[3] = BlockToIncrement;
-            CommandAsBytes[6] = ValuesBytes[3];
-            CommandAsBytes[7] = ValuesBytes[2];
-            CommandAsBytes[8] = ValuesBytes[1];
-            CommandAsBytes[9] = ValuesBytes[0];
+            byte[] ValuesBytes = BitConverter.GetBytes(Value);
+            if (BitConverter.IsLittleEndian)
+                Array.Reverse(ValuesBytes);
+
+            byte[] CommandAsBytes = new byte[10] { 0xFF, 0xD7, 0x00, BlockToIncrement, 0x05, 0x01, ValuesBytes[0], ValuesBytes[1], ValuesBytes[2], ValuesBytes[3] }; //BitConverter.GetBytes(_GetcardUIDBytesCommand);
 
             TransmitData(CommandAsBytes, out Return);
             return RetrieveDataCodes(ref Return);
@@ -767,18 +947,11 @@ namespace NFC_CardReader.ACR122U
         public ACR122U_ResposeErrorCodes DecrementValue(short Value, byte BlockToDecrement)
         {
             byte[] Return;
-            byte[] ValuesBytes;
-            //                                      FFD700000502FFFFFFFF
-            const ulong _GetcardUIDBytesCommand = 0xFFD700000502000;
-            byte[] CommandAsBytes = BitConverter.GetBytes(_GetcardUIDBytesCommand);
-            Array.Reverse(CommandAsBytes);
-            Array.Resize(ref CommandAsBytes, 10);
-            ValuesBytes = BitConverter.GetBytes(Value);
-            CommandAsBytes[3] = BlockToDecrement;
-            CommandAsBytes[6] = ValuesBytes[3];
-            CommandAsBytes[7] = ValuesBytes[2];
-            CommandAsBytes[8] = ValuesBytes[1];
-            CommandAsBytes[9] = ValuesBytes[0];
+            byte[] ValuesBytes = BitConverter.GetBytes(Value);
+            if (BitConverter.IsLittleEndian)
+                Array.Reverse(ValuesBytes);
+
+            byte[] CommandAsBytes = new byte[10] { 0xFF, 0xD7, 0x00, BlockToDecrement, 0x05, 0x01, ValuesBytes[0], ValuesBytes[1], ValuesBytes[2], ValuesBytes[3] };
 
             TransmitData(CommandAsBytes, out Return);
             return RetrieveDataCodes(ref Return);
@@ -801,12 +974,8 @@ namespace NFC_CardReader.ACR122U
         public ACR122U_ResposeErrorCodes Copy(byte SourceBlock, byte TargetBlock)
         {
             byte[] Return;
-            const ulong _GetcardUIDBytesCommand = 0xFFD7000002030000;
-            byte[] CommandAsBytes = BitConverter.GetBytes(_GetcardUIDBytesCommand);
-            Array.Reverse(CommandAsBytes);
-            Array.Resize(ref CommandAsBytes, 7);
-            CommandAsBytes[3] = SourceBlock;
-            CommandAsBytes[6] = TargetBlock;
+
+            byte[] CommandAsBytes = new byte[7] { 0xFF, 0xD7, 0x00, SourceBlock, 0x02, 0x03, TargetBlock };//BitConverter.GetBytes(_GetcardUIDBytesCommand);
 
             TransmitData(CommandAsBytes, out Return);
             return RetrieveDataCodes(ref Return);
