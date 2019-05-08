@@ -21,40 +21,14 @@ namespace NFC_CardReader.ACR122U
 
         #region DeviceUtilities
 
-        static ACR122U_ResposeErrorCodes RetrieveDataCodesStatic(ref byte[] Data)
-        {
-            byte[] OpReturn = new byte[4] { Data[Data.Length - 1], Data[Data.Length - 2], 0, 0 };
-            byte[] Temp = (byte[])Data.Clone();
-            Array.Copy(Temp, 3, Data, 0, Data.Length - 5);
-            Array.Resize(ref Data, Data.Length - 5);
-            
-            return (ACR122U_ResposeErrorCodes)BitConverter.ToInt32(OpReturn, 0);
-        }
-        //0xd5 0x41 0x27
-        static ACR122U_ResposeErrorCodes RetrieveDataCodesStatic(ref byte[] Data, out byte TrailingResposeData)
-        {
-            byte[] OpReturn = new byte[4] { Data[Data.Length - 1], Data[Data.Length - 2], 0, 0 };
-            byte[] Temp = (byte[])Data.Clone();
-            Array.Copy(Temp, 3, Data, 0, Data.Length - 4);
-            Array.Resize(ref Data, Data.Length - 4);
-            if (OpReturn[1] == 0x90)
-            {
-                TrailingResposeData = OpReturn[0];
-                OpReturn[0] = 0;
-            }
-            else
-                TrailingResposeData = 0;
-            return (ACR122U_ResposeErrorCodes)BitConverter.ToInt32(OpReturn, 0);
-        }
-
-        ACR122U_ResposeErrorCodes RetrieveDataCodes(ref byte[] Data)
+        static ACR122U_ResposeErrorCodes RetrieveDataCodes(ref byte[] Data)
         {
             byte[] OpReturn = new byte[4] { Data[Data.Length - 1], Data[Data.Length - 2], 0, 0 };
             Array.Resize(ref Data, Data.Length - 2);
             return (ACR122U_ResposeErrorCodes)BitConverter.ToInt32(OpReturn, 0);
         }
-
-        ACR122U_ResposeErrorCodes RetrieveDataCodes(ref byte[] Data, out byte TrailingResposeData)
+        //0xd5 0x41 0x27
+        static ACR122U_ResposeErrorCodes RetrieveDataCodes(ref byte[] Data, out byte TrailingResposeData)
         {
             byte[] OpReturn = new byte[4] { Data[Data.Length - 1], Data[Data.Length - 2], 0, 0 };
             Array.Resize(ref Data, Data.Length - 2);
@@ -119,30 +93,32 @@ namespace NFC_CardReader.ACR122U
         /// Turns RFID anntenna On with out need of card
         /// </summary>
         /// <returns></returns>
-        public static ACR122U_ResposeErrorCodes TurnAnntennaOnStatic(string Name)
+        public static ACR122U_ResposeErrorCodes TurnAnntennaOnStatic(WinSmartCardContext Context)
         {
+            bool HasCard;
             byte[] DataOut;
 
             byte[] CommandAsBytes = new byte[7] { 0xFF, 0x00, 0x00, 0x00, 0x04, 0xD4, 0x01 };
 
-            WinSmartCardContext.Control(Name, CommandAsBytes, out DataOut);
+            Context.Control(CommandAsBytes, out DataOut, out HasCard);
 
-            return RetrieveDataCodesStatic(ref DataOut);
+            return RetrieveDataCodes(ref DataOut);
         }
 
         /// <summary>
         /// Turns RFID anntenna off with out need of card
         /// </summary>
         /// <returns></returns>
-        public static ACR122U_ResposeErrorCodes TurnAnntennaOffStatic(string Name)
+        public static ACR122U_ResposeErrorCodes TurnAnntennaOffStatic(WinSmartCardContext Context)
         {
+            bool HasCard;
             byte[] DataOut;
 
             byte[] CommandAsBytes = new byte[7] { 0xFF, 0x00, 0x00, 0x00, 0x04, 0xD4, 0x00 };
 
-            WinSmartCardContext.Control(Name, CommandAsBytes, out DataOut);
+            Context.Control(CommandAsBytes, out DataOut, out HasCard);
 
-            return RetrieveDataCodesStatic(ref DataOut);
+            return RetrieveDataCodes(ref DataOut);
         }
 
         /// <summary>
@@ -159,15 +135,16 @@ namespace NFC_CardReader.ACR122U
         /// [ISO14443TypeA:1=Detect,0=Ignore]
         /// </param>
         /// <returns></returns>
-        public static ACR122U_ResposeErrorCodes GetPICCOperatingParameterStateStatic(string Name, out byte DataOut)
+        public static ACR122U_ResposeErrorCodes GetPICCOperatingParameterStateStatic(WinSmartCardContext Context, out byte DataOut)
         {
+            bool HasCard;
             byte[] Data;
 
             byte[] CommandAsBytes = new byte[5] { 0xFF, 0x00, 0x50, 0x00, 0x00 };
 
-            WinSmartCardContext.Control(Name, CommandAsBytes, out Data);
+            Context.Control(CommandAsBytes, out Data, out HasCard);
 
-            return RetrieveDataCodesStatic(ref Data, out DataOut);
+            return RetrieveDataCodes(ref Data, out DataOut);
         }
 
         /// <summary>
@@ -184,10 +161,10 @@ namespace NFC_CardReader.ACR122U
         /// [ISO14443TypeA:1=Detect,0=Ignore]
         /// </param>
         /// <returns></returns>
-        public static ACR122U_ResposeErrorCodes GetPICCOperatingParameterStateStatic(string Name, out ACR122U_PICCOperatingParametersControl SetInDataOut)
+        public static ACR122U_ResposeErrorCodes GetPICCOperatingParameterStateStatic(WinSmartCardContext Context, out ACR122U_PICCOperatingParametersControl SetInDataOut)
         {
             byte SetInData;
-            ACR122U_ResposeErrorCodes Return = GetPICCOperatingParameterStateStatic(Name, out SetInData);
+            ACR122U_ResposeErrorCodes Return = GetPICCOperatingParameterStateStatic(Context, out SetInData);
             SetInDataOut = (ACR122U_PICCOperatingParametersControl)SetInData;
             return Return;
         }
@@ -207,15 +184,16 @@ namespace NFC_CardReader.ACR122U
         /// [ISO14443TypeA:1=Detect,0=Ignore]
         /// </param>
         /// <returns></returns>
-        public static ACR122U_ResposeErrorCodes SetPICCOperatingParameterStateStatic(string Name, ref byte SetInDataOut)
+        public static ACR122U_ResposeErrorCodes SetPICCOperatingParameterStateStatic(WinSmartCardContext Context, ref byte SetInDataOut)
         {
+            bool HasCard;
             byte[] Data;
 
             byte[] CommandAsBytes = new byte[5] { 0xFF, 0x00, 0x51, SetInDataOut, 0x00 };
 
-            WinSmartCardContext.Control(Name, CommandAsBytes, out Data);
+            Context.Control(CommandAsBytes, out Data, out HasCard);
 
-            return RetrieveDataCodesStatic(ref Data, out SetInDataOut);
+            return RetrieveDataCodes(ref Data, out SetInDataOut);
         }
 
         /// <summary>
@@ -232,10 +210,10 @@ namespace NFC_CardReader.ACR122U
         /// [ISO14443TypeA:1=Detect,0=Ignore]
         /// </param>
         /// <returns></returns>
-        public static ACR122U_ResposeErrorCodes SetPICCOperatingParameterStateStatic(string Name, ref ACR122U_PICCOperatingParametersControl SetInDataOut)
+        public static ACR122U_ResposeErrorCodes SetPICCOperatingParameterStateStatic(WinSmartCardContext Context, ref ACR122U_PICCOperatingParametersControl SetInDataOut)
         {
             byte SetInData = (byte)SetInDataOut;
-            ACR122U_ResposeErrorCodes Return = SetPICCOperatingParameterStateStatic(Name, ref SetInData);
+            ACR122U_ResposeErrorCodes Return = SetPICCOperatingParameterStateStatic(Context, ref SetInData);
             SetInDataOut = (ACR122U_PICCOperatingParametersControl)SetInData;
             return Return;
         }
@@ -262,18 +240,19 @@ namespace NFC_CardReader.ACR122U
         /// [BuzzerOnT12Cycle(0x01):1=On,0=Off]
         /// <param name="DataOut">Some strange data that to this day I'm not sure of is incons only consi is the card comes on and of is +1</param>
         /// <returns></returns>
-        public static ACR122U_ResposeErrorCodes SetLEDandBuzzerControlStatic(string Name, ACR122U_LEDControl LEDControl, byte T1Duration, byte T2Durration, byte TimesToRepeat, ACR122U_BuzzerControl BuzzerControl, out byte DataOut)
+        public static ACR122U_ResposeErrorCodes SetLEDandBuzzerControlStatic(WinSmartCardContext Context, ACR122U_LEDControl LEDControl, byte T1Duration, byte T2Durration, byte TimesToRepeat, ACR122U_BuzzerControl BuzzerControl, out byte DataOut)
         {
             if (!Enum.IsDefined(typeof(ACR122U_BuzzerControl), BuzzerControl))
                 throw new Exception("Your BuzzerControl selection was not valid.");
 
+            bool HasCard;
             byte[] Data;
 
             byte[] CommandAsBytes = new byte[8] { 0xFF, 0x00, 0x40, (byte)LEDControl, 0x04, T1Duration, T1Duration, (byte)BuzzerControl };
 
-            WinSmartCardContext.Control(Name, CommandAsBytes, out Data);
+            Context.Control(CommandAsBytes, out Data, out HasCard);
 
-            return RetrieveDataCodesStatic(ref Data, out DataOut);
+            return RetrieveDataCodes(ref Data, out DataOut);
         }
 
         /// <summary>
@@ -288,17 +267,20 @@ namespace NFC_CardReader.ACR122U
         /// <param name="BitRateInTransmition"></param>
         /// <param name="ModulationType"></param>
         /// <returns></returns>
-        public static ACR122U_ResposeErrorCodes GetStatusStatic(string Name, out bool Card, out ACR122U_StatusErrorCodes ErrorCode, out bool FieldPresent, out byte NumberOfTargets, out byte LogicalNumber, out ACR122U_StatusBitRateInReception BitRateInReception, out ACR122U_StatusBitsRateInTransmiton BitRateInTransmition, out ACR122U_StatusModulationType ModulationType)
+        public static ACR122U_ResposeErrorCodes GetStatusStatic(WinSmartCardContext Context, out bool Card, out ACR122U_StatusErrorCodes ErrorCode, out bool FieldPresent, out byte NumberOfTargets, out byte LogicalNumber, out ACR122U_StatusBitRateInReception BitRateInReception, out ACR122U_StatusBitsRateInTransmiton BitRateInTransmition, out ACR122U_StatusModulationType ModulationType)
         {
+            bool HasCard;
             byte[] Data;
 
             byte[] CommandAsBytes = new byte[] { 0xFF, 0x00, 0x00, 0x00, 0x02, 0xD4, 0x04 };
 
-            WinSmartCardContext.Control(Name, CommandAsBytes, out Data);
+            Context.Control(CommandAsBytes, out Data, out HasCard);
 
             ErrorCode = (ACR122U_StatusErrorCodes)Data[2];
             FieldPresent = Data[3] != 0;
             NumberOfTargets = Data[4];
+            //required as data length doesnt change but some data is droped while leaving trailing 0s to force length of the same
+            //if a card is returned with a card this is the values 
             if (Data[9] == 0x80 && Data[10] == 0x90 && Data[11] == 0x00)
             {
                 Card = true;
@@ -309,6 +291,7 @@ namespace NFC_CardReader.ACR122U
 
                 return ACR122U_ResposeErrorCodes.Success;
             }
+            //if a card is returned with out card this is the values
             else if (Data[5] == 0x80 && Data[6] == 0x90 && Data[7] == 0x00)
             {
                 Card = false;
@@ -319,13 +302,8 @@ namespace NFC_CardReader.ACR122U
 
                 return ACR122U_ResposeErrorCodes.Success;
             }
-
-            Card = false;
-            LogicalNumber = 0;
-            BitRateInReception = ACR122U_StatusBitRateInReception.NoReception;
-            BitRateInTransmition = ACR122U_StatusBitsRateInTransmiton.NoTransmiton;
-            ModulationType = ACR122U_StatusModulationType.NoCardDetected;
-            return RetrieveDataCodesStatic(ref Data);
+            else
+                throw new ACR122U_SmartCardException(ACR122U_ResposeErrorCodes.APIError, ErrorCodes.SCARD_S_SUCCESS);
         }
         #endregion
 

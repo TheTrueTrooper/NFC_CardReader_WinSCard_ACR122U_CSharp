@@ -14,10 +14,6 @@ namespace CardReader_TestConsole
         {
             #region WincardAPIImportTesting
 
-            #region ContextInIt
-            WinSmartCardContext Context = new WinSmartCardContext(OperationScopes.SCARD_SCOPE_SYSTEM);
-            #endregion
-
             #region ContextGetReaders
             Console.WriteLine("Currently connected readers: ");
             int MaxNumber = 0;
@@ -27,16 +23,40 @@ namespace CardReader_TestConsole
                 Console.WriteLine("\t" + MaxNumber + ":" + Reader);
                 MaxNumber += 1;
             }
+            Console.WriteLine("Filtering to usable test readers. Note: driver update adds ACS ACR122U PICC Interface that are not usable.");
+            Console.WriteLine("Currently connected ACR122U readers: ");
+            Names = WinSmartCardContext.ListReadersAsStringsStatic();
+            Names = Names.Where(x=> x.Contains("ACS ACR122") && !x.Contains("ACS ACR122U PICC Interface")).ToList();
+            MaxNumber = 0;
+            foreach (string Reader in Names)
+            {
+                Console.WriteLine("\t" + MaxNumber + ":" + Reader);
+                MaxNumber += 1;
+            }
             #endregion
 
             #region ContextConnect
             int Selection = 0;
+            //Console.WriteLine("Please try and select one.\nNote do not pick ACS ACR122U PICC Interface.\nDriver update added them and it doesnt work.\nA ACS ACR122, will work however.");
             Console.WriteLine("Please try and select one.");
             while (!(int.TryParse(Console.ReadLine(), out Selection) && -1 < Selection && Selection < MaxNumber))
             {
                 Console.WriteLine("Oops thats not a valid selection number. Try again.");
+                //"ACS ACR122U PICC Interface Interface 0"
             }
 
+            #region ContextInIt
+            WinSmartCardContext Context = new WinSmartCardContext(OperationScopes.SCARD_SCOPE_SYSTEM, Names[Selection]);
+
+            #region CardLessStaticFuncs/Methods
+            ACR122U_PICCOperatingParametersControl Settings;
+            NFC_CardReader.ACR122U.ACR122U_SmartCard.GetPICCOperatingParameterStateStatic(Context, out Settings);
+            Console.WriteLine("Getting PICC: " + Settings);
+            #endregion
+
+            #endregion
+
+            #region WinscardStatusChange
             Console.WriteLine("Testing polling/blocking calls");
             Console.WriteLine("Please change state");
             ReadersCurrentState[] States = new ReadersCurrentState[] { new ReadersCurrentState() { ReaderName = Names[Selection] } };
@@ -78,7 +98,7 @@ namespace CardReader_TestConsole
             Console.WriteLine("\t\tStates Current State: " + States[0].CurrentState);
             Console.WriteLine("\t\tStates Changed Reader: " + States[0].ReaderName);
 
-            
+
             States[0].CurrentState = States[0].EventState;
             LastState = States[0];
             while (LastState.EventState == States[0].EventState)
@@ -91,7 +111,11 @@ namespace CardReader_TestConsole
             Console.WriteLine("\t\tStates Current State: " + States[0].CurrentState);
             Console.WriteLine("\t\tStates Changed Reader: " + States[0].ReaderName);
 
-            WinSmartCard WSC = Context.Connect(Names[Selection], SmartCardShareTypes.SCARD_SHARE_SHARED);
+            #endregion
+
+            #endregion
+
+            WinSmartCard WSC = Context.CardConnect(SmartCardShareTypes.SCARD_SHARE_SHARED);
             Console.WriteLine("Connected to card as winscard.\n\tProperties are");
 
             Console.WriteLine("\t\tIsAliveWithAContext: " + WSC.IsAliveWithContext);
@@ -99,7 +123,6 @@ namespace CardReader_TestConsole
             Console.WriteLine("\t\tATR(ConvertedFromBytes): " + BitConverter.ToString(WSC.ATR.ToArray()));
             Console.WriteLine("\t\tProtocol: " + WSC.Protocol);
             Console.WriteLine("\t\tReaderName: " + WSC.Parent.ConnectedReaderName);
-            #endregion
 
             #region WinscardGetStatus
             SmartCardStatus Status;
@@ -151,7 +174,6 @@ namespace CardReader_TestConsole
             #endregion
 
             #region ACRGet/SetPICC
-            ACR122U_PICCOperatingParametersControl Settings;
             ACR122U_SmartCard.GetPICCOperatingParameterState(out Settings);
             Console.WriteLine("Getting PICC: " + Settings);
             Settings = ACR122U_PICCOperatingParametersControl.AllOff;
@@ -164,6 +186,8 @@ namespace CardReader_TestConsole
             ACR122U_SmartCard.SetPICCOperatingParameterState(ref Settings);
             Console.WriteLine("Setting PICC");
             Console.WriteLine("\tPICC Setting Return: " + Settings);
+            ACR122U_SmartCard.GetPICCOperatingParameterState(out Settings);
+            Console.WriteLine("Getting PICC: " + Settings);
             #endregion
 
             #region GetUDI
@@ -189,6 +213,12 @@ namespace CardReader_TestConsole
             byte OddData;
             ACR122U_SmartCard.SetLEDandBuzzerControl(ACR122U_LEDControl.InitialRedBlinkingState | ACR122U_LEDControl.RedBlinkingMask | ACR122U_LEDControl.RedLEDStateMask | ACR122U_LEDControl.GreenFinalState, 20, 20, 2, ACR122U_BuzzerControl.BuzzerOnT1Cycle, out OddData);
             Console.WriteLine("\tDone.\n\tAdditional odd Data(some times shows with no expanation): " + OddData);
+            #endregion
+
+
+            #region CardLessStaticFuncs/Methods
+            ACR122U_SmartCard.GetPICCOperatingParameterStateStatic(Context, out Settings);
+            Console.WriteLine("Getting PICC: " + Settings);
             #endregion
 
             #endregion

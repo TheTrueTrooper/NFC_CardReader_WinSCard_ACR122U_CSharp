@@ -6,17 +6,10 @@ using System.Threading.Tasks;
 
 namespace NFC_CardReader
 {
-    //https://github.com/danm-de/pcsc-sharp/blob/master/src/PCSC/SCardAttribute.cs
     ///  <summary>
     ///  Smart card reader attribute enumeration.
     ///  </summary>
     /// <remarks>Can be used as parameter for the following methods:
-    /// <list type="bullet">
-    /// <item><term><see cref="M:PCSC.SCardReader.GetAttrib(PCSC.SCardAttribute,System.Byte[]@)" /></term></item>
-    /// <item><term><see cref="M:PCSC.SCardReader.GetAttrib(PCSC.SCardAttribute,System.Byte[],System.Int32@)" /></term></item>
-    /// <item><term><see cref="M:PCSC.SCardReader.SetAttrib(PCSC.SCardAttribute,System.Byte[])" /></term></item>
-    /// <item><term><see cref="M:PCSC.SCardReader.SetAttrib(PCSC.SCardAttribute,System.Byte[],System.Int32)" /></term></item>
-    /// </list></remarks>
     public enum SmartCardATR
     {
         /// <summary>

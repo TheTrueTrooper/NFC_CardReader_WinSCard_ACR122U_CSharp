@@ -24,6 +24,9 @@ namespace NFC_CardReader
     /// </summary>
     static internal class StateHelpers
     {
+        /// <summary>
+        /// ReadersCurrentState Reader to SCARD_READERSTATE
+        /// </summary>
         internal static ReadersCurrentState[] ToReadersCurrentState(this SCARD_READERSTATE[] In)
         {
             ReadersCurrentState[] Return = new ReadersCurrentState[In.Count()];
@@ -40,6 +43,9 @@ namespace NFC_CardReader
             return Return;
         }
 
+        /// <summary>
+        /// SCARD_READERSTATE Reader to ReadersCurrentState
+        /// </summary>
         internal static SCARD_READERSTATE[] ToSCARD_READERSTATE(this ReadersCurrentState[] In)
         {
             SCARD_READERSTATE[] Return = new SCARD_READERSTATE[In.Length];

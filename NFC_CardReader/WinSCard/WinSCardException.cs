@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace NFC_CardReader
 {
+    /// <summary>
+    /// An exception to throw in regards to errors from the wincard dll
+    /// </summary>
     public class WinSCardException : Exception
     {
         /// <summary>

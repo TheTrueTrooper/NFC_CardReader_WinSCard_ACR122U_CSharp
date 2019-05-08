@@ -52,7 +52,7 @@ namespace NFC_CardReader
     //UnmanagedType.ByValArray, SizeConst:=36
 
     /// <summary>
-    /// A class that imports the Winscard.dll mostly raw with small tweaks to make it more friendly but still matian original form
+    /// A class that imports the Winscard.dll mostly raw with small tweaks to make it more friendly but still maint original form
     /// </summary>
     internal static class WinSCard
     {

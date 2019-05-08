@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace NFC_CardReader.ACR122U
 {
+    /// <summary>
+    /// A list of possible memory loctions to use with reader for keys
+    /// </summary>
     public enum ACR122U_KeyMemories
     {
         /// <summary>

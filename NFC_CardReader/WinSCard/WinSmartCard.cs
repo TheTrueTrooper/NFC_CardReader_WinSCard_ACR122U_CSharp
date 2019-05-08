@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace NFC_CardReader
 {
+    /// <summary>
+    /// A class to Wrap all the wincard dll in very C# friendly wrapping
+    /// </summary>
     public class WinSmartCard : IDisposable
     {
         /// <summary>
@@ -118,8 +121,8 @@ namespace NFC_CardReader
         /// <summary>
         /// Gets the attribute support stopped as current reader doesn't support
         /// </summary>
-        /// <param name="Attribute"></param>
-        /// <param name="AttrOut"></param>
+        /// <param name="Attribute">he attribute to get</param>
+        /// <param name="AttrOut">it's value as bytes</param>
         /// <returns></returns>
         public virtual ErrorCodes GetAttrib(SmartCardATR Attribute, out byte[] AttrOut)
         {
@@ -133,8 +136,8 @@ namespace NFC_CardReader
         /// <summary>
         /// Gets the attribute support stopped as current reader doesn't support
         /// </summary>
-        /// <param name="Attribute"></param>
-        /// <param name="AttrOut"></param>
+        /// <param name="Attribute">he attribute to get</param>
+        /// <param name="AttrOut">it's value as a string</param>
         /// <returns></returns>
         public virtual ErrorCodes GetAttrib(SmartCardATR Attribute, out string AttrOut, bool IsBytes = false)
         {
@@ -151,9 +154,9 @@ namespace NFC_CardReader
         /// <summary>
         /// Transmits a buffer as a command for the ADPU command formate mostly used by the ACR122
         /// </summary>
-        /// <param name="SendCommand"></param>
-        /// <param name="ReceivedResponse"></param>
-        /// <param name="Protocol"></param>
+        /// <param name="SendCommand">the command to send as bytes</param>
+        /// <param name="ReceivedResponse">the respose recived as bytes</param>
+        /// <param name="Protocol">The protocol to use Default to null selecting the instances protocol</param>
         /// <returns></returns>
         public ErrorCodes TransmitData(byte[] SendCommand, out byte[] ReceivedResponse, SmartCardProtocols? Protocol = null)
         {
@@ -197,16 +200,20 @@ namespace NFC_CardReader
             return WinSCard.SCardEndTransaction(_Card, Dispostion);
         }
 
+
         /// <summary>
-        /// Sends a Raw byte buffer for commands that fall out side of the ADPU
+        /// Sends a Raw byte buffer for commands that fall out side of the ADPU or are sudo ADPU
         /// </summary>
-        /// <param name="Card"></param>
-        /// <param name="dwControlCode"></param>
-        /// <param name="SendBuff"></param>
-        /// <param name="RecvBuff"></param>
+        /// <param name="SendCommand">The Command to send as bytes</param>
+        /// <param name="ReceivedResponse">The ReceivedResponse as bytes</param>
+        /// <param name="Scope">The Scope to use defualted to System</param>
+        /// <param name="Protocol">The protocol to use Default to null selecting the instances protocol</param>
         /// <returns></returns>
-        public ErrorCodes Control(byte[] SendCommand, out byte[] ReceivedResponse, OperationScopes Scope = OperationScopes.SCARD_SCOPE_SYSTEM, SmartCardProtocols Protocol = SmartCardProtocols.SCARD_PROTOCOL_UNDEFINED)
+        public ErrorCodes Control(byte[] SendCommand, out byte[] ReceivedResponse, OperationScopes Scope = OperationScopes.SCARD_SCOPE_SYSTEM, SmartCardProtocols? Protocol = null)
         {
+            if (Protocol == null)
+                Protocol = this.Protocol;
+
             uint IOTL = (int)IOTLOperations.IOCTL_SMARTCARD_DIRECT; // 3225264;
             ReceivedResponse = new byte[256];
 

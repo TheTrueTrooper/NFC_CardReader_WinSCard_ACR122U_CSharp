@@ -21,9 +21,14 @@ namespace NFC_CardReader.ACR122U
         /// </summary>
         FuctionNotSupported = 0x6A81,
         /// <summary>
-        /// Added Error to Mark an event were as the Winscard throws before Acr122u Reader; 
-        ///     Extra full bite will ensure no collision.
+        /// If the API has had and error. outside of posible return values by length so no risk of colish.
         /// </summary>
+        // outside (half byte) of posible return values by length so no risk of colish.
+        APIError = 0xFFF,
+        /// <summary>
+        /// Added Error to Mark an event were as the Winscard throws before Acr122u Reader; 
+        /// </summary>
+        // outside (full byte) of posible return values by length so no risk of colish.
         WinSCardError = 0xFFFFFF
     }
 }
