@@ -846,11 +846,12 @@ namespace NFC_CardReader.ACR122U
         90 00
         */
         /// <summary>
-        /// Writes a 16 bit interger to the block
+        /// Writes a 32 bit interger to the block
         /// </summary>
         /// <param name="Value">The number output</param>
         /// <param name="BlockToRead">The Block to Read from</param>
         /// <returns></returns>
+        // dont believe the compiler it lies my int is bigger.....
         public ACR122U_ResposeErrorCodes ReadValueFromBlock(out Int32 Value, byte BlockToRead)
         {
             ACR122U_ResposeErrorCodes Return;
@@ -881,7 +882,7 @@ namespace NFC_CardReader.ACR122U
         90 00
         */
         /// <summary>
-        /// Writes a 16 bit interger to the block
+        /// Writes a 32 bit interger to the block
         /// </summary>
         /// <param name="Value">the number to write</param>
         /// <param name="BlockToWrite">The Block to write to</param>
