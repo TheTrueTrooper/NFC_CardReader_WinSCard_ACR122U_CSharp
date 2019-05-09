@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using NFC_CardReader.CppToCSharpConversionHelpers;
 
 namespace NFC_CardReader.ACR122U
@@ -325,7 +326,8 @@ namespace NFC_CardReader.ACR122U
 
             TransmitData(CommandAsBytes, out DataOut);
 
-            return RetrieveDataCodes(ref DataOut);
+            LastACRResultCode = RetrieveDataCodes(ref DataOut);
+            return LastACRResultCode;
         }
 
         /*Turn On/Off anntenna (Couldnt Figure out what this was actually doing out actually)
@@ -346,7 +348,8 @@ namespace NFC_CardReader.ACR122U
 
             TransmitData(CommandAsBytes, out DataOut);
 
-            return RetrieveDataCodes(ref DataOut);
+            LastACRResultCode = RetrieveDataCodes(ref DataOut);
+            return LastACRResultCode;
         }
 
         /*Get PICC Operating Parameter state
@@ -386,7 +389,8 @@ namespace NFC_CardReader.ACR122U
 
             TransmitData(CommandAsBytes, out Data);
 
-            return RetrieveDataCodes(ref Data, out DataOut);
+            LastACRResultCode = RetrieveDataCodes(ref Data, out DataOut);
+            return LastACRResultCode;
         }
 
         /// <summary>
@@ -449,7 +453,8 @@ namespace NFC_CardReader.ACR122U
 
             TransmitData(CommandAsBytes, out Data);
 
-            return RetrieveDataCodes(ref Data, out SetInDataOut);
+            LastACRResultCode = RetrieveDataCodes(ref Data, out SetInDataOut);
+            return LastACRResultCode;
         }
 
         /// <summary>
@@ -523,7 +528,8 @@ namespace NFC_CardReader.ACR122U
 
             TransmitData(CommandAsBytes, out Data);
 
-            return RetrieveDataCodes(ref Data, out DataOut);
+            LastACRResultCode = RetrieveDataCodes(ref Data, out DataOut);
+            return LastACRResultCode;
         }
 
         /*Get Status
@@ -586,7 +592,8 @@ namespace NFC_CardReader.ACR122U
                 BitRateInTransmition = ACR122U_StatusBitsRateInTransmiton.NoTransmiton;
                 ModulationType = ACR122U_StatusModulationType.NoCardDetected;
 
-                return ACR122U_ResposeErrorCodes.Success;
+                LastACRResultCode = ACR122U_ResposeErrorCodes.Success;
+                return LastACRResultCode;
             }
 
             Card = false;
@@ -594,7 +601,8 @@ namespace NFC_CardReader.ACR122U
             BitRateInReception = ACR122U_StatusBitRateInReception.NoReception;
             BitRateInTransmition = ACR122U_StatusBitsRateInTransmiton.NoTransmiton;
             ModulationType = ACR122U_StatusModulationType.NoCardDetected;
-            return RetrieveDataCodes(ref Data); 
+            LastACRResultCode = ACR122U_ResposeErrorCodes.Success;
+            return LastACRResultCode;
         }
 
         #endregion
@@ -617,7 +625,8 @@ namespace NFC_CardReader.ACR122U
 
             TransmitData(CommandAsBytes, out receivedUID);
 
-            return RetrieveDataCodes(ref receivedUID);
+            LastACRResultCode = RetrieveDataCodes(ref receivedUID);
+            return LastACRResultCode;
         }
 
         /// <summary>
@@ -635,7 +644,7 @@ namespace NFC_CardReader.ACR122U
             if (LastACRResultCode != ACR122U_ResposeErrorCodes.Success)
                 throw new ACR122U_SmartCardException(LastACRResultCode, LastResultCode);
 
-            cardUID = BitConverter.ToString(receivedUID);  
+            cardUID = BitConverter.ToString(receivedUID);
 
             return cardUID;
         }
@@ -658,7 +667,8 @@ namespace NFC_CardReader.ACR122U
 
             TransmitData(CommandAsBytes, out receivedUID);
 
-            return RetrieveDataCodes(ref receivedUID);
+            LastACRResultCode = RetrieveDataCodes(ref receivedUID);
+            return LastACRResultCode;
         }
 
         /// <summary>
@@ -669,7 +679,7 @@ namespace NFC_CardReader.ACR122U
         public string GetcardATS()//only for mifare 1k cards
         {
 
-            string cardUID = "";
+            string cardATS = "";
             byte[] receivedUID;
 
             LastACRResultCode = GetcardATSBytes(out receivedUID);
@@ -677,9 +687,9 @@ namespace NFC_CardReader.ACR122U
             if (LastACRResultCode != ACR122U_ResposeErrorCodes.Success)
                 throw new ACR122U_SmartCardException(LastACRResultCode, LastResultCode);
 
-            cardUID = BitConverter.ToString(receivedUID);  
+            cardATS = BitConverter.ToString(receivedUID);  
 
-            return cardUID;
+            return cardATS;
         }
 
         /*Load Key
@@ -708,7 +718,8 @@ namespace NFC_CardReader.ACR122U
 
             TransmitData(CommandAsBytes, out Return);
 
-            return RetrieveDataCodes(ref Return);
+            LastACRResultCode = RetrieveDataCodes(ref Return);
+            return LastACRResultCode;
         }
 
         /// <summary>
@@ -748,12 +759,11 @@ namespace NFC_CardReader.ACR122U
                 throw new Exception("Your Key Selection is not a valid one.");
 
             byte[] Return;
-
             byte[] CommandAsBytes = new byte[10] { 0xFF, 0x86, 0x00, 0x00, 0x05, 0x01, 0x00, BlockToAthenticate, (byte)(0x60 | (byte)Key), (byte)KeyToUse }; 
-
+            
             TransmitData(CommandAsBytes, out Return);
-
-            return RetrieveDataCodes(ref Return);
+            LastACRResultCode = RetrieveDataCodes(ref Return);
+            return LastACRResultCode;
         }
 
         /// <summary>
@@ -768,7 +778,8 @@ namespace NFC_CardReader.ACR122U
                 throw new Exception("Your Key Selection for KeyToUse is not a valid one.");
             if (!Enum.IsDefined(typeof(ACR122U_Keys), Key))
                 throw new Exception("Your Key Selection for Key is not a valid one.");
-            return Athentication( BlockToAthenticate, Key, (ACR122U_KeyMemories)KeyToUse);
+            LastACRResultCode = Athentication( BlockToAthenticate, Key, (ACR122U_KeyMemories)KeyToUse);
+            return LastACRResultCode;
         }
 
         /*Read Bock
@@ -795,14 +806,15 @@ namespace NFC_CardReader.ACR122U
 
             TransmitData(CommandAsBytes, out DataOut);
 
-            return RetrieveDataCodes(ref DataOut);
+            LastACRResultCode = RetrieveDataCodes(ref DataOut);
+            return LastACRResultCode;
         }
 
         /*WriteBlock
         *Send 
-        FF B0 00 51 10 FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF
+        FF D6 00 51 10 FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF
         or
-        FF B0 00 51 10 [Data]...
+        FF D6 00 51 10 [Data]...
         *Returns
         90 00
         */
@@ -818,10 +830,11 @@ namespace NFC_CardReader.ACR122U
             if (DataIn.Length != 16)
                 throw new Exception("Your Data In has too or too few bites.\nWrite commands must have 16 bytes.");
 
-            byte[] CommandAsBytes = new byte[21] { 0xFF, 0xB0, 0x00, BlockToWrite, 0x10, DataIn[0], DataIn[1], DataIn[2], DataIn[3], DataIn[4], DataIn[5], DataIn[6], DataIn[7], DataIn[8], DataIn[9], DataIn[10], DataIn[11], DataIn[12], DataIn[13], DataIn[14], DataIn[15] }; 
+            byte[] CommandAsBytes = new byte[21] { 0xFF, 0xD6, 0x00, BlockToWrite, 0x10, DataIn[0], DataIn[1], DataIn[2], DataIn[3], DataIn[4], DataIn[5], DataIn[6], DataIn[7], DataIn[8], DataIn[9], DataIn[10], DataIn[11], DataIn[12], DataIn[13], DataIn[14], DataIn[15] }; 
 
             TransmitData(CommandAsBytes, out Return);
-            return RetrieveDataCodes(ref Return);
+            LastACRResultCode = RetrieveDataCodes(ref Return);
+            return LastACRResultCode;
         }
 
         /*ReadValue
@@ -838,7 +851,7 @@ namespace NFC_CardReader.ACR122U
         /// <param name="Value">The number output</param>
         /// <param name="BlockToRead">The Block to Read from</param>
         /// <returns></returns>
-        public ACR122U_ResposeErrorCodes ReadValueFromBlock(out short Value, byte BlockToRead)
+        public ACR122U_ResposeErrorCodes ReadValueFromBlock(out Int32 Value, byte BlockToRead)
         {
             ACR122U_ResposeErrorCodes Return;
             byte[] DataBack;
@@ -847,10 +860,16 @@ namespace NFC_CardReader.ACR122U
 
             TransmitData(CommandAsBytes, out DataBack);
             Return = RetrieveDataCodes(ref DataBack);
-            if (BitConverter.IsLittleEndian)
-                Array.Reverse(DataBack);
-            Value = BitConverter.ToInt16(DataBack, 0);
-            return Return;
+            if (Return == ACR122U_ResposeErrorCodes.Success)
+            {
+                if (BitConverter.IsLittleEndian)
+                    Array.Reverse(DataBack);
+                Value = BitConverter.ToInt32(DataBack, 0);
+            }
+            else
+                Value = 0;
+            LastACRResultCode = Return;
+            return LastACRResultCode;
         }
 
         /*WriteValue
@@ -867,7 +886,7 @@ namespace NFC_CardReader.ACR122U
         /// <param name="Value">the number to write</param>
         /// <param name="BlockToWrite">The Block to write to</param>
         /// <returns></returns>
-        public ACR122U_ResposeErrorCodes WriteValueToBlock(short Value, byte BlockToWrite)
+        public ACR122U_ResposeErrorCodes WriteValueToBlock(Int32 Value, byte BlockToWrite)
         {
             byte[] Return;
             byte[] ValuesBytes;
@@ -878,7 +897,8 @@ namespace NFC_CardReader.ACR122U
             byte[] CommandAsBytes = new byte[10] { 0xFF, 0xD7, 0x00, BlockToWrite, 0x05, 0x00, ValuesBytes[0], ValuesBytes[1], ValuesBytes[2], ValuesBytes[3] };//BitConverter.GetBytes(_GetcardUIDBytesCommand);
 
             TransmitData(CommandAsBytes, out Return);
-            return RetrieveDataCodes(ref Return);
+            LastACRResultCode = RetrieveDataCodes(ref Return);
+            return LastACRResultCode;
         }
 
         /*IncrementValue
@@ -895,7 +915,7 @@ namespace NFC_CardReader.ACR122U
         /// <param name="Value">The amount to add</param>
         /// <param name="BlockToIncrement">The block to add to</param>
         /// <returns></returns>
-        public ACR122U_ResposeErrorCodes IncrementValue(short Value, byte BlockToIncrement)
+        public ACR122U_ResposeErrorCodes IncrementValue(Int32 Value, byte BlockToIncrement)
         {
             byte[] Return;
             byte[] ValuesBytes = BitConverter.GetBytes(Value);
@@ -905,7 +925,8 @@ namespace NFC_CardReader.ACR122U
             byte[] CommandAsBytes = new byte[10] { 0xFF, 0xD7, 0x00, BlockToIncrement, 0x05, 0x01, ValuesBytes[0], ValuesBytes[1], ValuesBytes[2], ValuesBytes[3] }; //BitConverter.GetBytes(_GetcardUIDBytesCommand);
 
             TransmitData(CommandAsBytes, out Return);
-            return RetrieveDataCodes(ref Return);
+            LastACRResultCode = RetrieveDataCodes(ref Return);
+            return LastACRResultCode;
         }
 
         /*IncrementValue
@@ -922,17 +943,18 @@ namespace NFC_CardReader.ACR122U
         /// <param name="Value">The amount to subtract</param>
         /// <param name="BlockToDecrement">The block to subtract to</param>
         /// <returns></returns>
-        public ACR122U_ResposeErrorCodes DecrementValue(short Value, byte BlockToDecrement)
+        public ACR122U_ResposeErrorCodes DecrementValue(Int32 Value, byte BlockToDecrement)
         {
             byte[] Return;
             byte[] ValuesBytes = BitConverter.GetBytes(Value);
             if (BitConverter.IsLittleEndian)
                 Array.Reverse(ValuesBytes);
 
-            byte[] CommandAsBytes = new byte[10] { 0xFF, 0xD7, 0x00, BlockToDecrement, 0x05, 0x01, ValuesBytes[0], ValuesBytes[1], ValuesBytes[2], ValuesBytes[3] };
+            byte[] CommandAsBytes = new byte[10] { 0xFF, 0xD7, 0x00, BlockToDecrement, 0x05, 0x02, ValuesBytes[0], ValuesBytes[1], ValuesBytes[2], ValuesBytes[3] };
 
             TransmitData(CommandAsBytes, out Return);
-            return RetrieveDataCodes(ref Return);
+            LastACRResultCode = RetrieveDataCodes(ref Return);
+            return LastACRResultCode;
         }
 
         /*Copy
@@ -956,7 +978,8 @@ namespace NFC_CardReader.ACR122U
             byte[] CommandAsBytes = new byte[7] { 0xFF, 0xD7, 0x00, SourceBlock, 0x02, 0x03, TargetBlock };//BitConverter.GetBytes(_GetcardUIDBytesCommand);
 
             TransmitData(CommandAsBytes, out Return);
-            return RetrieveDataCodes(ref Return);
+            LastACRResultCode = RetrieveDataCodes(ref Return);
+            return LastACRResultCode;
         }
 
         #endregion

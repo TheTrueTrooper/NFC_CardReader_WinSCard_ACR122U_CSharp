@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace NFC_CardReader
@@ -145,7 +146,7 @@ namespace NFC_CardReader
         /// <param name="Card">The Card</param>
         /// <param name="Disposition"></param>
         /// <returns></returns>
-        internal static ErrorCodes SCardDisconnectWrapper(int Card, SmartCardDispostion Disposition)
+        internal static ErrorCodes SCardDisconnect(int Card, SmartCardDispostion Disposition)
         {
             return (ErrorCodes)SCardDisconnect(Card, (int)Disposition);
         }

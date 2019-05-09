@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace NFC_CardReader
@@ -10,7 +11,7 @@ namespace NFC_CardReader
     /// <summary>
     /// A class to Wrap all the wincard dll in very C# friendly wrapping
     /// </summary>
-    public class WinSmartCard : IDisposable
+    public class WinSmartCard //: IDisposable
     {
         /// <summary>
         /// A Pointer to the card as an int since C# doesn't really directly reference it
@@ -57,6 +58,8 @@ namespace NFC_CardReader
         /// </summary>
         public string ATRString { get => BitConverter.ToString(ATR.ToArray()); }
 
+        public bool Disposed { get; private set; } = false;
+
         /// <summary>
         /// Constructor for internal use
         /// </summary>
@@ -85,6 +88,8 @@ namespace NFC_CardReader
         /// <returns>The Result of calls made to to the winscard.dll</returns>
         public ErrorCodes GetStatus(out byte[] NameOfReader, out SmartCardStatus Status, out SmartCardProtocols Protocol, out byte[] ATR)
         {
+            if (Disposed)
+                throw new ObjectDisposedException("WinSmartCardContext");
             Status = SmartCardStatus.SCARD_UNKNOWN;
             Protocol = SmartCardProtocols.SCARD_PROTOCOL_UNDEFINED;
             int LengthOfName = 0;
@@ -126,6 +131,8 @@ namespace NFC_CardReader
         /// <returns></returns>
         public virtual ErrorCodes GetAttrib(SmartCardATR Attribute, out byte[] AttrOut)
         {
+            if (Disposed)
+                throw new ObjectDisposedException("WinSmartCardContext");
             int AttrLength = 0;
             LastResultCode = WinSCard.SCardGetAttrib(_Card, Attribute, null, ref AttrLength);
             AttrOut = new byte[AttrLength];
@@ -185,6 +192,8 @@ namespace NFC_CardReader
         /// <returns></returns>
         public ErrorCodes BeginTransaction()
         {
+            if (Disposed)
+                throw new ObjectDisposedException("WinSmartCardContext");
             IsInTransaction = true;
             return WinSCard.SCardBeginTransaction(_Card);
         }
@@ -196,6 +205,8 @@ namespace NFC_CardReader
         /// <returns></returns>
         public ErrorCodes BeginTransaction(SmartCardDispostion Dispostion)
         {
+            if (Disposed)
+                throw new ObjectDisposedException("WinSmartCardContext");
             IsInTransaction = false;
             return WinSCard.SCardEndTransaction(_Card, Dispostion);
         }
@@ -211,6 +222,8 @@ namespace NFC_CardReader
         /// <returns></returns>
         public ErrorCodes Control(byte[] SendCommand, out byte[] ReceivedResponse, OperationScopes Scope = OperationScopes.SCARD_SCOPE_SYSTEM, SmartCardProtocols? Protocol = null)
         {
+            if (Disposed)
+                throw new ObjectDisposedException("WinSmartCardContext");
             if (Protocol == null)
                 Protocol = this.Protocol;
 
@@ -231,8 +244,13 @@ namespace NFC_CardReader
         /// </summary>
         public void Dispose()
         {
-            IsAliveWithContext = false;
-            Parent.NotifyOfCardsDeath();
+            if (!Disposed)
+            {
+                Disposed = true;
+                IsAliveWithContext = false;
+                Parent.NotifyOfCardsDeath();
+                WinSCard.SCardDisconnect(_Card, SmartCardDispostion.SCARD_RESET_CARD);
+            }
         }
 
         /// <summary>
@@ -240,8 +258,13 @@ namespace NFC_CardReader
         /// </summary>
         ~WinSmartCard()
         {
-            IsAliveWithContext = false;
-            Parent.NotifyOfCardsDeath();
+            if (!Disposed)
+            {
+                Disposed = true;
+                IsAliveWithContext = false;
+                Parent.NotifyOfCardsDeath();
+                WinSCard.SCardDisconnect(_Card, SmartCardDispostion.SCARD_RESET_CARD);
+            }
         }
     }
 }

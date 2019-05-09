@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace NFC_CardReader
 {
-    public class WinSmartCardContext : IDisposable
+    public class WinSmartCardContext //: IDisposable
     {
         /// <summary>
         /// A Pointer to the a context as an int since C# doesn't really directly reference it
@@ -34,6 +34,8 @@ namespace NFC_CardReader
         /// </summary>
         public ErrorCodes LastResultCode { get; protected set; } = ErrorCodes.SCARD_S_SUCCESS;
 
+        bool Disposed = false;
+
         /// <summary>
         /// Creates a connect at the use scope requested
         /// </summary>
@@ -55,6 +57,8 @@ namespace NFC_CardReader
         /// <returns></returns>
         public ErrorCodes Control(byte[] SendCommand, out byte[] ReceivedResponse, out bool HasCard, OperationScopes Scope = OperationScopes.SCARD_SCOPE_SYSTEM, SmartCardProtocols Protocol = SmartCardProtocols.SCARD_PROTOCOL_UNDEFINED)
         {
+            if (Disposed)
+                throw new ObjectDisposedException("WinSmartCardContext");
             int TempCard = 0;
             int AProtocol = 0;
             uint IOTL = (uint)IOTLOperations.IOCTL_SMARTCARD_DIRECT; // 3225264;
@@ -72,7 +76,7 @@ namespace NFC_CardReader
                 LastResultCode = WinSCard.SCardControl(TempCard, IOTL, SendCommand, ref ReceivedResponse, ref outBytes);
                 if (LastResultCode != ErrorCodes.SCARD_S_SUCCESS)
                     throw new WinSCardException(LastResultCode, WinSCard.GetScardErrMsg(LastResultCode) + "\nError perceived durring Control");
-                LastResultCode = WinSCard.SCardDisconnectWrapper(TempCard, SmartCardDispostion.SCARD_LEAVE_CARD);
+                LastResultCode = WinSCard.SCardDisconnect(TempCard, SmartCardDispostion.SCARD_RESET_CARD);
                 if (LastResultCode != ErrorCodes.SCARD_S_SUCCESS)
                     throw new WinSCardException(LastResultCode, WinSCard.GetScardErrMsg(LastResultCode) + "\nError perceived durring Card Release");
                 Array.Resize(ref ReceivedResponse, outBytes);
@@ -125,6 +129,8 @@ namespace NFC_CardReader
         /// <returns>reader names</returns>
         public List<string> ListReadersAsStrings(bool ThrowOnNoReader = true)
         {
+            if (Disposed)
+                throw new ObjectDisposedException("WinSmartCardContext");
             int ReaderCount = 0;
             List<string> AvailableReaderList = new List<string>();
 
@@ -158,6 +164,8 @@ namespace NFC_CardReader
         /// <returns></returns>
         public ErrorCodes GetStatusChange(int TimeOut, ref ReadersCurrentState[] States)
         {
+            if (Disposed)
+                throw new ObjectDisposedException("WinSmartCardContext");
             LastResultCode = WinSCard.SCardGetStatusChange(_Context, TimeOut, ref States, States.Count());
             return LastResultCode;
         }
@@ -172,6 +180,8 @@ namespace NFC_CardReader
         /// <returns></returns>
         public WinSmartCard CardConnect(SmartCardShareTypes SmartCardShareTypes, SmartCardShareTypes ShareType = SmartCardShareTypes.SCARD_SHARE_SHARED, SmartCardProtocols Protocols = SmartCardProtocols.SCARD_PROTOCOL_Any )
         {
+            if (Disposed)
+                throw new ObjectDisposedException("WinSmartCardContext");
             int Card = 0;
             int Protocol = 0;
 
@@ -200,10 +210,16 @@ namespace NFC_CardReader
         public void Dispose()
         {
             if (Card != null)
+            {
                 Card.Dispose();
-            LastResultCode = WinSCard.SCardReleaseContext(_Context);
-            if (LastResultCode != ErrorCodes.SCARD_S_SUCCESS)
-                throw new WinSCardException(LastResultCode, WinSCard.GetScardErrMsg(LastResultCode) + "\nThrown clean up.");
+            }
+            if (!Disposed)
+            {
+                LastResultCode = WinSCard.SCardReleaseContext(_Context);
+                if (LastResultCode != ErrorCodes.SCARD_S_SUCCESS)
+                    throw new WinSCardException(LastResultCode, WinSCard.GetScardErrMsg(LastResultCode) + "\nThrown clean up.");
+                Disposed = true;
+            }
         }
 
         /// <summary>
@@ -212,10 +228,16 @@ namespace NFC_CardReader
         ~WinSmartCardContext()
         {
             if (Card != null)
+            {
                 Card.Dispose();
-            LastResultCode = WinSCard.SCardReleaseContext(_Context);
-            if (LastResultCode != ErrorCodes.SCARD_S_SUCCESS)
-                throw new WinSCardException(LastResultCode, WinSCard.GetScardErrMsg(LastResultCode) + "\nThrown clean up.");
+            }
+            if (!Disposed)
+            {
+                LastResultCode = WinSCard.SCardReleaseContext(_Context);
+                if (LastResultCode != ErrorCodes.SCARD_S_SUCCESS)
+                    throw new WinSCardException(LastResultCode, WinSCard.GetScardErrMsg(LastResultCode) + "\nThrown clean up.");
+                Disposed = true;
+            }
         }
 
         /// <summary>
