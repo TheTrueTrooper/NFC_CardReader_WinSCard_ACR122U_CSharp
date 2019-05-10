@@ -24,7 +24,7 @@ namespace NFC_CardReader.ACR122U
         /// If the API has had and error. outside of posible return values by length so no risk of colish.
         /// </summary>
         // outside (half byte) of posible return values by length so no risk of colish.
-        APIError = 0xFFF,
+        APIError = 0xFFFFF,
         /// <summary>
         /// Added Error to Mark an event were as the Winscard throws before Acr122u Reader; 
         /// </summary>
