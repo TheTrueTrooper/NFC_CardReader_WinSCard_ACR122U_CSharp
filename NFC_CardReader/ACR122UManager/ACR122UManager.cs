@@ -1,4 +1,5 @@
 ﻿using NFC_CardReader.ACR122U;
+using NFC_CardReader.WinSCard;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,31 +9,84 @@ using System.Threading.Tasks;
 
 namespace NFC_CardReader.ACR122UManager
 {
+    /// <summary>
+    /// A class to wrap the winscard and ACR122 API in a easy to use single unit as overall API and manage the card grabbing
+    /// </summary>
     public class ACR122UManager : IDisposable
     {
+        /// <summary>
+        /// a basic event for if a card readers state has changed (card placed, timed out extra)
+        /// </summary>
         public ACRCardStateChangeEventHandler CardStateChanged;
+
+        /// <summary>
+        /// the event handler for if a card is accepted by the LocalCardCheckOverRide (or GlobalCardCheck if not set) when CheckCard is set to true
+        /// </summary>
         public ACRCardAcceptedCardScanEventHandler AcceptedCardScaned;
+
+        /// <summary>
+        /// the event handler for if a card is rejected by the LocalCardCheckOverRide (or GlobalCardCheck if not set) when CheckCard is set to true
+        /// </summary>
         public ACRCardRejectedCardScanEventHandler RejectedCardScaned;
+
+        /// <summary>
+        /// the event handler for if a card is removed 
+        /// </summary>
         public ACRCardRemovedEventHandler CardRemoved;
+
+        /// <summary>
+        /// the event handler for if a card is detected 
+        /// </summary>
         public ACRCardDetectedEventHandler CardDetected;
 
+        /// <summary>
+        /// Our overall card reader context
+        /// </summary>
         public WinSmartCardContext Context { private set; get; }
 
+        /// <summary>
+        /// the Reader we are using and its name
+        /// </summary>
         public string ReaderName { private set; get; }
 
+        /// <summary>
+        /// the listing and polling thread
+        /// </summary>
         Thread ListenerThread;
-        public bool LetListenerThreadEnd { private set; get; } = false;
 
+        /// <summary>
+        /// The value to allow the other listening thread to die gracefully
+        /// </summary>
+        bool LetListenerThreadEnd = false;
+
+        /// <summary>
+        /// the Time out on blocking call polling
+        /// </summary>
         int TimeOut;
 
+        /// <summary>
+        /// should we use the reject and accept functions with the global/local check functions set as a gate
+        /// </summary>
         public bool CheckCard = false;
 
+        /// <summary>
+        /// The card that is in the machine
+        /// </summary>
         public ACR122U_SmartCard Card { private set; get; }
 
+        /// <summary>
+        /// A global check we can set if we have a global scope for checking
+        /// </summary>
         public static Func<ACRCardStateChangeEventArg, bool> GlobalCardCheck = (e) => throw new NotImplementedException("GlobalCardCheck or LocalCardCheckOverRide has not been set on ACR122UManager. Please ensure these have been set prior to turning on the CardCheck bool.");
 
+        /// <summary>
+        /// the private local storage for fuction pointer for the check
+        /// </summary>
         Func<ACRCardStateChangeEventArg, bool> _LocalCardCheckOverRide = null;
 
+        /// <summary>
+        /// A accessor for the local card check that will defualt to the global if not set
+        /// </summary>
         public Func<ACRCardStateChangeEventArg, bool> LocalCardCheckOverRide
         {
             get
@@ -45,6 +99,10 @@ namespace NFC_CardReader.ACR122UManager
             set => _LocalCardCheckOverRide = value;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public static List<string> GetACR122UReaders()
         {
             List<string> Names = WinSmartCardContext.ListReadersAsStringsStatic();
@@ -52,6 +110,11 @@ namespace NFC_CardReader.ACR122UManager
             return Names;
         }
 
+        /// <summary>
+        /// Creates a new manager and starts a polling thread to listen for changes
+        /// </summary>
+        /// <param name="ReaderName">the reader to use</param>
+        /// <param name="TimeOut">The poll rate in ms</param>
         public ACR122UManager(string ReaderName, int TimeOut = 1000)
         {
             this.ReaderName = ReaderName;
@@ -60,8 +123,12 @@ namespace NFC_CardReader.ACR122UManager
             Context = new WinSmartCardContext(OperationScopes.SCARD_SCOPE_SYSTEM, ReaderName);
             ListenerThread = new Thread(new ParameterizedThreadStart(ListenerThreadFunction));
             ListenerThread.Start(this);
-        }      
+        }
 
+        #region ConnectingCalls
+        /// <summary>
+        /// The use to connect with card and use.
+        /// </summary>
         public void ConnectToCard()
         {
             //Context.Dispose();
@@ -70,11 +137,15 @@ namespace NFC_CardReader.ACR122UManager
             Card = new ACR122U_SmartCard(Context.CardConnect(SmartCardShareTypes.SCARD_SHARE_SHARED));
         }
 
+        /// <summary>
+        /// The use to disconnect with card.
+        /// </summary>
         public void DisconnectToCard()
         {
             Card?.Dispose();
             Card = null;
         }
+        #endregion
 
         #region CardReaderSudoADPUReaderComands
         /// <summary>
@@ -83,10 +154,13 @@ namespace NFC_CardReader.ACR122UManager
         /// <returns></returns>
         public void TurnAnntennaOn()
         {
+            ACR122U_ResposeErrorCodes Error;
             if (Card == null)
-                ACR122U_SmartCard.TurnAnntennaOnStatic(Context);
+                Error = ACR122U_SmartCard.TurnAnntennaOnStatic(Context);
             else
-                Card.TurnAnntennaOn();
+                Error = Card.TurnAnntennaOn();
+            if (Error != ACR122U_ResposeErrorCodes.Success)
+                throw new ACR122U_SmartCardException(Error, ErrorCodes.SCARD_S_SUCCESS);
         }
 
         /// <summary>
@@ -95,10 +169,13 @@ namespace NFC_CardReader.ACR122UManager
         /// <returns></returns>
         public void TurnAnntennaOff()
         {
+            ACR122U_ResposeErrorCodes Error;
             if (Card == null)
-                ACR122U_SmartCard.TurnAnntennaOffStatic(Context);
+                Error = ACR122U_SmartCard.TurnAnntennaOffStatic(Context);
             else
-                Card.TurnAnntennaOff();
+                Error = Card.TurnAnntennaOff();
+            if (Error != ACR122U_ResposeErrorCodes.Success)
+                throw new ACR122U_SmartCardException(Error, ErrorCodes.SCARD_S_SUCCESS);
         }
 
         /// <summary>
@@ -117,10 +194,13 @@ namespace NFC_CardReader.ACR122UManager
         /// <returns></returns>
         public void GetPICCOperatingParameterState(out byte DataOut)
         {
+            ACR122U_ResposeErrorCodes Error;
             if (Card == null)
-                ACR122U_SmartCard.GetPICCOperatingParameterStateStatic(Context, out DataOut);
+                Error = ACR122U_SmartCard.GetPICCOperatingParameterStateStatic(Context, out DataOut);
             else
-                Card.GetPICCOperatingParameterState(out DataOut);
+                Error = Card.GetPICCOperatingParameterState(out DataOut);
+            if (Error != ACR122U_ResposeErrorCodes.Success)
+                throw new ACR122U_SmartCardException(Error, ErrorCodes.SCARD_S_SUCCESS);
         }
 
         /// <summary>
@@ -139,10 +219,13 @@ namespace NFC_CardReader.ACR122UManager
         /// <returns></returns>
         public void GetPICCOperatingParameterState(out ACR122U_PICCOperatingParametersControl SetInDataOut)
         {
+            ACR122U_ResposeErrorCodes Error;
             if (Card == null)
-                ACR122U_SmartCard.GetPICCOperatingParameterStateStatic(Context, out SetInDataOut);
+                Error = ACR122U_SmartCard.GetPICCOperatingParameterStateStatic(Context, out SetInDataOut);
             else
-                Card.GetPICCOperatingParameterState(out SetInDataOut);
+                Error = Card.GetPICCOperatingParameterState(out SetInDataOut);
+            if (Error != ACR122U_ResposeErrorCodes.Success)
+                throw new ACR122U_SmartCardException(Error, ErrorCodes.SCARD_S_SUCCESS);
         }
 
         /// <summary>
@@ -161,10 +244,13 @@ namespace NFC_CardReader.ACR122UManager
         /// <returns></returns>
         public void SetPICCOperatingParameterState(ref byte SetInDataOut)
         {
+            ACR122U_ResposeErrorCodes Error;
             if (Card == null)
-                ACR122U_SmartCard.SetPICCOperatingParameterStateStatic(Context, ref SetInDataOut);
+                Error = ACR122U_SmartCard.SetPICCOperatingParameterStateStatic(Context, ref SetInDataOut);
             else
-                Card.SetPICCOperatingParameterState(ref SetInDataOut);
+                Error = Card.SetPICCOperatingParameterState(ref SetInDataOut);
+            if (Error != ACR122U_ResposeErrorCodes.Success)
+                throw new ACR122U_SmartCardException(Error, ErrorCodes.SCARD_S_SUCCESS);
         }
 
         /// <summary>
@@ -183,10 +269,13 @@ namespace NFC_CardReader.ACR122UManager
         /// <returns></returns>
         public void SetPICCOperatingParameterState(ref ACR122U_PICCOperatingParametersControl SetInDataOut)
         {
+            ACR122U_ResposeErrorCodes Error;
             if (Card == null)
-                ACR122U_SmartCard.SetPICCOperatingParameterStateStatic(Context, ref SetInDataOut);
+                Error = ACR122U_SmartCard.SetPICCOperatingParameterStateStatic(Context, ref SetInDataOut);
             else
-                Card.SetPICCOperatingParameterState(ref SetInDataOut);
+                Error = Card.SetPICCOperatingParameterState(ref SetInDataOut);
+            if (Error != ACR122U_ResposeErrorCodes.Success)
+                throw new ACR122U_SmartCardException(Error, ErrorCodes.SCARD_S_SUCCESS);
         }
 
         /// <summary>
@@ -213,10 +302,13 @@ namespace NFC_CardReader.ACR122UManager
         /// <returns></returns>
         public void SetLEDandBuzzerControl(ACR122U_LEDControl LEDControl, byte T1Duration, byte T2Durration, byte TimesToRepeat, ACR122U_BuzzerControl BuzzerControl, out byte DataOut)
         {
+            ACR122U_ResposeErrorCodes Error;
             if (Card == null)
-                ACR122U_SmartCard.SetLEDandBuzzerControlStatic(Context, LEDControl, T1Duration, T2Durration, TimesToRepeat, BuzzerControl, out DataOut);
+                Error = ACR122U_SmartCard.SetLEDandBuzzerControlStatic(Context, LEDControl, T1Duration, T2Durration, TimesToRepeat, BuzzerControl, out DataOut);
             else
-                Card.SetLEDandBuzzerControl(LEDControl, T1Duration, T2Durration, TimesToRepeat, BuzzerControl, out DataOut);
+                Error = Card.SetLEDandBuzzerControl(LEDControl, T1Duration, T2Durration, TimesToRepeat, BuzzerControl, out DataOut);
+            if (Error != ACR122U_ResposeErrorCodes.Success)
+                throw new ACR122U_SmartCardException(Error, ErrorCodes.SCARD_S_SUCCESS);
         }
 
         /// <summary>
@@ -233,10 +325,29 @@ namespace NFC_CardReader.ACR122UManager
         /// <returns></returns>
         public void GetStatus(out bool Card, out ACR122U_StatusErrorCodes ErrorCode, out bool FieldPresent, out byte NumberOfTargets, out byte LogicalNumber, out ACR122U_StatusBitRateInReception BitRateInReception, out ACR122U_StatusBitsRateInTransmiton BitRateInTransmition, out ACR122U_StatusModulationType ModulationType)
         {
+            ACR122U_ResposeErrorCodes Error;
             if (this.Card == null)
-                ACR122U_SmartCard.GetStatusStatic(Context, out Card, out ErrorCode, out FieldPresent, out NumberOfTargets, out LogicalNumber, out BitRateInReception, out BitRateInTransmition, out ModulationType);
+                Error = ACR122U_SmartCard.GetStatusStatic(Context, out Card, out ErrorCode, out FieldPresent, out NumberOfTargets, out LogicalNumber, out BitRateInReception, out BitRateInTransmition, out ModulationType);
             else
-                this.Card.GetStatus(out Card, out ErrorCode, out FieldPresent, out NumberOfTargets, out LogicalNumber, out BitRateInReception, out BitRateInTransmition, out ModulationType);
+                Error = this.Card.GetStatus(out Card, out ErrorCode, out FieldPresent, out NumberOfTargets, out LogicalNumber, out BitRateInReception, out BitRateInTransmition, out ModulationType);
+            if (Error != ACR122U_ResposeErrorCodes.Success)
+                throw new ACR122U_SmartCardException(Error, ErrorCodes.SCARD_S_SUCCESS);
+        }
+
+        /// <summary>
+        /// Gets the Status from the ACR122 using its internal method
+        /// </summary>
+        /// <param name="ACR122U_Status">A container with all of the status</param>
+        /// <returns></returns>
+        public void GetStatus(out ACR122U_Status ACR122U_Status)
+        {
+            ACR122U_ResposeErrorCodes Error;
+            if (this.Card == null)
+                Error = ACR122U_SmartCard.GetStatusStatic(Context, out ACR122U_Status);
+            else
+                Error = this.Card.GetStatus(out ACR122U_Status);
+            if (Error != ACR122U_ResposeErrorCodes.Success)
+                throw new ACR122U_SmartCardException(Error, ErrorCodes.SCARD_S_SUCCESS);
         }
         #endregion
 
@@ -450,9 +561,13 @@ namespace NFC_CardReader.ACR122UManager
         #endregion
         #endregion
 
-
+        /// <summary>
+        /// A private thread to use for polling
+        /// </summary>
+        /// <param name="This"></param>
         static void ListenerThreadFunction(object This)
         {
+            //set everting up and pass our selves in
             ACR122UManager Manager = (ACR122UManager)This;
 
             ReadersCurrentState[] States;
@@ -464,523 +579,59 @@ namespace NFC_CardReader.ACR122UManager
 
             while (!LetEnd)
             {
-                /////Again but this time for ever
-                //States[0].CurrentState = States[0].EventState;
-                //LastState = States[0];
+                //cpp blocking call untill the readers state has changed.
                 while (States[0].CurrentState == States[0].EventState)
                 {
                     lock (Manager.Context)
                         Manager.Context.GetStatusChange(Manager.TimeOut, ref States);
                 }
 
+                //if the state has changed notify everyone
                 lock (Manager.CardStateChanged)
                     Manager.CardStateChanged.Invoke(Manager, new ACRCardStateChangeEventArg(Manager, States[0]));
 
+                //prepare for next check
                 States[0].CurrentState = States[0].EventState;
 
+                //check to see if we should let the thread die
                 lock (Manager)
                    LetEnd = Manager.LetListenerThreadEnd;
             }
         }
 
+        /// <summary>
+        /// an private event for calling the other events on a state change
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         void CardStateChangedFunction(object sender, ACRCardStateChangeEventArg e)
         {
+            //on state change
+            //check if there is a card
             if (e.ATR == null || e.ATR.Count() == 0)
                 CardRemoved?.Invoke(sender, new ACRCardRemovedEventArg(this, e));
             else
                 CardDetected?.Invoke(sender, new ACRCardDetectedEventArg(this, e));
+            //check if we want the card
             if (CheckCard && LocalCardCheckOverRide.Invoke(e))
                 AcceptedCardScaned?.Invoke(sender, new ACRCardAcceptedCardScanEventArg(this, e));
             else if (CheckCard && e.ATR != null && e.ATR.Count() > 0)
                 RejectedCardScaned?.Invoke(sender, new ACRCardRejectedCardScanEventArg(this, e));
         }
 
-
-
-
+        /// <summary>
+        /// A way for you to print out the error messages
+        /// </summary>
+        /// <param name="ReturnCode">The code to check</param>
+        /// <returns>a satement to its meening</returns>
         public static string GetACRErrMsg(ACR122U_ResposeErrorCodes ReturnCode)
         {
-            switch (ReturnCode)
-            {
-                case ACR122U_ResposeErrorCodes.Success:
-                    return "The action was Successful.";
-                case ACR122U_ResposeErrorCodes.Error:
-                    return "The action was Canceled due to Error. Please Call status to get error";
-                case ACR122U_ResposeErrorCodes.FuctionNotSupported:
-                    return "The action could not be executed as the fuction is not supported by your current hardware or firmware";
-                case ACR122U_ResposeErrorCodes.WinSCardError:
-                    return "An error occurred before the ACR122u at the Winscard.dll";
-                default:
-                    return "?";
-            }
+            return ACR122U_SmartCard.GetACRErrMsg(ReturnCode);
         }
 
-
-        #region DeviceSpecificCommandsPseudoAPDU
-
-        #region CardLessVers
         /// <summary>
-        /// Turns RFID anntenna On with out need of card
+        /// the disposal interface
         /// </summary>
-        /// <returns></returns>
-        //public static ACR122U_ResposeErrorCodes TurnAnntennaOnStatic(WinSmartCardContext Context)
-        //{
-
-        //}
-
-        ///// <summary>
-        ///// Turns RFID anntenna off with out need of card
-        ///// </summary>
-        ///// <returns></returns>
-        //public static ACR122U_ResposeErrorCodes TurnAnntennaOffStatic(WinSmartCardContext Context)
-        //{
-
-        //}
-
-        ///// <summary>
-        ///// Gets the Opperating params of system
-        ///// </summary>
-        ///// <param name="DataOut"> A byte as
-        ///// [AutoPICCPolling:1=Enable,0=Disable]
-        ///// [AutoATSGeneration:1=Enable,0=Disable]
-        ///// [PollingInterval:1=250ms,0=500ms]
-        ///// [Felica424K:1=Detect,0=Ignore]
-        ///// [Felica212K:1=Detect,0=Ignore]
-        ///// [Topaz:1=Detect,0=Ignore]
-        ///// [ISO14443TypeB:1=Detect,0=Ignore]
-        ///// [ISO14443TypeA:1=Detect,0=Ignore]
-        ///// </param>
-        ///// <returns></returns>
-        //public static ACR122U_ResposeErrorCodes GetPICCOperatingParameterStateStatic(WinSmartCardContext Context, out byte DataOut)
-        //{
-
-        //}
-
-        ///// <summary>
-        ///// Gets the Opperating params of system
-        ///// </summary>
-        ///// <param name="DataOut"> A enumerated byte as
-        ///// [AutoPICCPolling:1=Enable,0=Disable]
-        ///// [AutoATSGeneration:1=Enable,0=Disable]
-        ///// [PollingInterval:1=250ms,0=500ms]
-        ///// [Felica424K:1=Detect,0=Ignore]
-        ///// [Felica212K:1=Detect,0=Ignore]
-        ///// [Topaz:1=Detect,0=Ignore]
-        ///// [ISO14443TypeB:1=Detect,0=Ignore]
-        ///// [ISO14443TypeA:1=Detect,0=Ignore]
-        ///// </param>
-        ///// <returns></returns>
-        //public static ACR122U_ResposeErrorCodes GetPICCOperatingParameterStateStatic(WinSmartCardContext Context, out ACR122U_PICCOperatingParametersControl SetInDataOut)
-        //{
-
-        //}
-
-
-        ///// <summary>
-        ///// Sets and returns the Opperating params of system with out need of card
-        ///// </summary>
-        ///// <param name="DataOut"> A byte as
-        ///// [AutoPICCPolling:1=Enable,0=Disable]
-        ///// [AutoATSGeneration:1=Enable,0=Disable]
-        ///// [PollingInterval:1=250ms,0=500ms]
-        ///// [Felica424K:1=Detect,0=Ignore]
-        ///// [Felica212K:1=Detect,0=Ignore]
-        ///// [Topaz:1=Detect,0=Ignore]
-        ///// [ISO14443TypeB:1=Detect,0=Ignore]
-        ///// [ISO14443TypeA:1=Detect,0=Ignore]
-        ///// </param>
-        ///// <returns></returns>
-        //public static ACR122U_ResposeErrorCodes SetPICCOperatingParameterStateStatic(WinSmartCardContext Context, ref byte SetInDataOut)
-        //{
-
-        //}
-
-        ///// <summary>
-        ///// Sets and returns the Opperating params of system with out need of card
-        ///// </summary>
-        ///// <param name="DataOut"> A enumerated byte as
-        ///// [AutoPICCPolling:1=Enable,0=Disable]
-        ///// [AutoATSGeneration:1=Enable,0=Disable]
-        ///// [PollingInterval:1=250ms,0=500ms]
-        ///// [Felica424K:1=Detect,0=Ignore]
-        ///// [Felica212K:1=Detect,0=Ignore]
-        ///// [Topaz:1=Detect,0=Ignore]
-        ///// [ISO14443TypeB:1=Detect,0=Ignore]
-        ///// [ISO14443TypeA:1=Detect,0=Ignore]
-        ///// </param>
-        ///// <returns></returns>
-        //public static ACR122U_ResposeErrorCodes SetPICCOperatingParameterStateStatic(WinSmartCardContext Context, ref ACR122U_PICCOperatingParametersControl SetInDataOut)
-        //{
-
-        //}
-
-        ///// <summary>
-        ///// Sets the buzzer and LEDs to work in a T1 and T2 cycle like in a alarm with out need for card
-        ///// </summary>
-        ///// <param name="LEDControl"> A enumberated byte as
-        ///// [GreenBlinkingMask(0x80):1=Blink,0=Dont]
-        ///// [RedBlinkingMask(0x40):1=Blink,0=Dont]
-        ///// [InitialGreenBlinkingState(0x20):1=On,0=Off]
-        ///// [InitialRedBlinkingState(0x10):1=On,0=Off]
-        ///// [GreenLEDStateMask(0x08):1=Update,0=Dont]
-        ///// [RedLEDStateMask(0x04):1=Update,0=Dont]    
-        ///// [GreenFinalState(0x02):1=On,0=Off]
-        ///// [BuzzerOnT1Cycle(0x02):1=On,0=Off]
-        ///// [RedFinalState(0x01):1=On,0=Off]   </param>
-        ///// <param name="T1Duration">T1Duration byte(as value x 100ms)</param>
-        ///// <param name="T2Durration">T2Duration byte(as value x 100ms)</param>
-        ///// <param name="TimesToRepeat">The Number of times that It sould repeat both cycles</param>
-        ///// <param name="BuzzerControl"></param> A enumberated byte as
-        ///// [BuzzerOnT1Cycle(0x02):1=On,0=Off]
-        ///// [RedFinalState(0x01):1=On,0=Off]
-        ///// [BuzzerOnT12Cycle(0x01):1=On,0=Off]
-        ///// <param name="DataOut">Some strange data that to this day I'm not sure of is incons only consi is the card comes on and of is +1</param>
-        ///// <returns></returns>
-        //public static ACR122U_ResposeErrorCodes SetLEDandBuzzerControlStatic(WinSmartCardContext Context, ACR122U_LEDControl LEDControl, byte T1Duration, byte T2Durration, byte TimesToRepeat, ACR122U_BuzzerControl BuzzerControl, out byte DataOut)
-        //{
-
-        //}
-
-        ///// <summary>
-        ///// Gets the Status from the ACR122 using its internal method
-        ///// </summary>
-        ///// <param name="Card"></param>
-        ///// <param name="ErrorCode"></param>
-        ///// <param name="FieldPresent"></param>
-        ///// <param name="NumberOfTargets"></param>
-        ///// <param name="LogicalNumber"></param>
-        ///// <param name="BitRateInReception"></param>
-        ///// <param name="BitRateInTransmition"></param>
-        ///// <param name="ModulationType"></param>
-        ///// <returns></returns>
-        //public static ACR122U_ResposeErrorCodes GetStatusStatic(WinSmartCardContext Context, out bool Card, out ACR122U_StatusErrorCodes ErrorCode, out bool FieldPresent, out byte NumberOfTargets, out byte LogicalNumber, out ACR122U_StatusBitRateInReception BitRateInReception, out ACR122U_StatusBitsRateInTransmiton BitRateInTransmition, out ACR122U_StatusModulationType ModulationType)
-        //{
-
-        //}
-        //#endregion
-
-        ///// <summary>
-        ///// Turns RFID anntenna On
-        ///// </summary>
-        ///// <returns></returns>
-        //public ACR122U_ResposeErrorCodes TurnAnntennaOn()
-        //{
-
-        //}
-
-        ///// <summary>
-        ///// Turns RFID anntenna off
-        ///// </summary>
-        ///// <returns></returns>
-        //public ACR122U_ResposeErrorCodes TurnAnntennaOff()
-        //{
-
-        //}
-
-        ///// <summary>
-        ///// Gets the Opperating params of system
-        ///// </summary>
-        ///// <param name="DataOut"> A byte as
-        ///// [AutoPICCPolling:1=Enable,0=Disable]
-        ///// [AutoATSGeneration:1=Enable,0=Disable]
-        ///// [PollingInterval:1=250ms,0=500ms]
-        ///// [Felica424K:1=Detect,0=Ignore]
-        ///// [Felica212K:1=Detect,0=Ignore]
-        ///// [Topaz:1=Detect,0=Ignore]
-        ///// [ISO14443TypeB:1=Detect,0=Ignore]
-        ///// [ISO14443TypeA:1=Detect,0=Ignore]
-        ///// </param>
-        ///// <returns></returns>
-        //public ACR122U_ResposeErrorCodes GetPICCOperatingParameterState(out byte DataOut)
-        //{
-
-        //}
-
-        ///// <summary>
-        ///// Gets the Opperating params of system
-        ///// </summary>
-        ///// <param name="DataOut"> A enumerated byte as
-        ///// [AutoPICCPolling:1=Enable,0=Disable]
-        ///// [AutoATSGeneration:1=Enable,0=Disable]
-        ///// [PollingInterval:1=250ms,0=500ms]
-        ///// [Felica424K:1=Detect,0=Ignore]
-        ///// [Felica212K:1=Detect,0=Ignore]
-        ///// [Topaz:1=Detect,0=Ignore]
-        ///// [ISO14443TypeB:1=Detect,0=Ignore]
-        ///// [ISO14443TypeA:1=Detect,0=Ignore]
-        ///// </param>
-        ///// <returns></returns>
-        //public ACR122U_ResposeErrorCodes GetPICCOperatingParameterState(out ACR122U_PICCOperatingParametersControl SetInDataOut)
-        //{
-
-        //}
-
-        ///// <summary>
-        ///// Sets and returns the Opperating params of system
-        ///// </summary>
-        ///// <param name="DataOut"> A byte as
-        ///// [AutoPICCPolling:1=Enable,0=Disable]
-        ///// [AutoATSGeneration:1=Enable,0=Disable]
-        ///// [PollingInterval:1=250ms,0=500ms]
-        ///// [Felica424K:1=Detect,0=Ignore]
-        ///// [Felica212K:1=Detect,0=Ignore]
-        ///// [Topaz:1=Detect,0=Ignore]
-        ///// [ISO14443TypeB:1=Detect,0=Ignore]
-        ///// [ISO14443TypeA:1=Detect,0=Ignore]
-        ///// </param>
-        ///// <returns></returns>
-        //public ACR122U_ResposeErrorCodes SetPICCOperatingParameterState(ref byte SetInDataOut)
-        //{
-        //    byte[] Data;
-
-        //    byte[] CommandAsBytes = new byte[5] { 0xFF, 0x00, 0x51, SetInDataOut, 0x00 };
-
-        //    TransmitData(CommandAsBytes, out Data);
-
-        //    LastACRResultCode = RetrieveDataCodes(ref Data, out SetInDataOut);
-        //    return LastACRResultCode;
-        //}
-
-        ///// <summary>
-        ///// Sets and returns the Opperating params of system
-        ///// </summary>
-        ///// <param name="DataOut"> A enumerated byte as
-        ///// [AutoPICCPolling:1=Enable,0=Disable]
-        ///// [AutoATSGeneration:1=Enable,0=Disable]
-        ///// [PollingInterval:1=250ms,0=500ms]
-        ///// [Felica424K:1=Detect,0=Ignore]
-        ///// [Felica212K:1=Detect,0=Ignore]
-        ///// [Topaz:1=Detect,0=Ignore]
-        ///// [ISO14443TypeB:1=Detect,0=Ignore]
-        ///// [ISO14443TypeA:1=Detect,0=Ignore]
-        ///// </param>
-        ///// <returns></returns>
-        //public ACR122U_ResposeErrorCodes SetPICCOperatingParameterState(ref ACR122U_PICCOperatingParametersControl SetInDataOut)
-        //{
-
-        //}
-
-        ///// <summary>
-        ///// Sets the buzzer and LEDs to work in a T1 and T2 cycle like in a alarm
-        ///// </summary>
-        ///// <param name="LEDControl"> A enumberated byte as
-        ///// [GreenBlinkingMask(0x80):1=Blink,0=Dont]
-        ///// [RedBlinkingMask(0x40):1=Blink,0=Dont]
-        ///// [InitialGreenBlinkingState(0x20):1=On,0=Off]
-        ///// [InitialRedBlinkingState(0x10):1=On,0=Off]
-        ///// [GreenLEDStateMask(0x08):1=Update,0=Dont]
-        ///// [RedLEDStateMask(0x04):1=Update,0=Dont]    
-        ///// [GreenFinalState(0x02):1=On,0=Off]
-        ///// [BuzzerOnT1Cycle(0x02):1=On,0=Off]
-        ///// [RedFinalState(0x01):1=On,0=Off]   </param>
-        ///// <param name="T1Duration">T1Duration byte(as value x 100ms)</param>
-        ///// <param name="T2Durration">T2Duration byte(as value x 100ms)</param>
-        ///// <param name="TimesToRepeat">The Number of times that It sould repeat both cycles</param>
-        ///// <param name="BuzzerControl"></param> A enumberated byte as
-        ///// [BuzzerOnT1Cycle(0x02):1=On,0=Off]
-        ///// [RedFinalState(0x01):1=On,0=Off]
-        ///// [BuzzerOnT12Cycle(0x01):1=On,0=Off]
-        ///// <param name="DataOut">Some strange data that to this day I'm not sure of is incons only consi is the card comes on and of is +1</param>
-        ///// <returns></returns>
-        //public ACR122U_ResposeErrorCodes SetLEDandBuzzerControl(ACR122U_LEDControl LEDControl, byte T1Duration, byte T2Durration, byte TimesToRepeat, ACR122U_BuzzerControl BuzzerControl, out byte DataOut)
-        //{
-
-        //}
-
-        ///// <summary>
-        ///// Gets the Status from the ACR122 using its internal method
-        ///// </summary>
-        ///// <param name="Card"></param>
-        ///// <param name="ErrorCode"></param>
-        ///// <param name="FieldPresent"></param>
-        ///// <param name="NumberOfTargets"></param>
-        ///// <param name="LogicalNumber"></param>
-        ///// <param name="BitRateInReception"></param>
-        ///// <param name="BitRateInTransmition"></param>
-        ///// <param name="ModulationType"></param>
-        ///// <returns></returns>
-        //public ACR122U_ResposeErrorCodes GetStatus(out bool Card, out ACR122U_StatusErrorCodes ErrorCode, out bool FieldPresent, out byte NumberOfTargets, out byte LogicalNumber, out ACR122U_StatusBitRateInReception BitRateInReception, out ACR122U_StatusBitsRateInTransmiton BitRateInTransmition, out ACR122U_StatusModulationType ModulationType)
-        //{
-
-        //}
-
-        //#endregion
-        //#region CardCommandsAllFor1KForNow
-
-        ///// <summary>
-        ///// Gets the UID as bytes
-        ///// </summary>
-        ///// <param name="receivedUID">the UID</param>
-        ///// <returns></returns>
-        //public ACR122U_ResposeErrorCodes GetcardUIDBytes(out byte[] receivedUID)//only for mifare 1k cards
-        //{
-
-        //}
-
-        ///// <summary>
-        ///// Gets the UID as as a string
-        ///// </summary>
-        ///// <returns></returns>
-        //public string GetcardUID()//only for mifare 1k cards
-        //{
-
-        //}
-
-        ///// <summary>
-        ///// Gets The ATS Current particuar hardware or firmware or card doesnt support
-        ///// </summary>
-        ///// <param name="receivedUID"></param>
-        ///// <returns></returns>
-        //public ACR122U_ResposeErrorCodes GetcardATSBytes(out byte[] receivedUID)//only for mifare 1k cards
-        //{
-
-        //}
-
-        ///// <summary>
-        ///// Gets The ATS Current particuar hardware or firmware or card doesnt support
-        ///// </summary>
-        ///// <param name="receivedUID"></param>
-        ///// <returns></returns>
-        //public string GetcardATS()//only for mifare 1k cards
-        //{
-
-        //}
-
-        ///// <summary>
-        ///// Loads Athentication Keys into the system
-        ///// </summary>
-        ///// <param name="Key">A enumeration as 1 or 2 for posible memory locations</param>
-        ///// <param name="KeyValue">The Key Value to use. Length must be six</param>
-        ///// <returns></returns>
-        //public ACR122U_ResposeErrorCodes LoadAthenticationKeys(ACR122U_KeyMemories Key, byte[] KeyValue)//only for mifare 1k cards
-        //{
-
-        //}
-
-        ///// <summary>
-        ///// Loads Athentication Keys into the system
-        ///// </summary>
-        ///// <param name="Key">A enumeration as A or B for if you want to match keys to memory(A is read key B is master)</param>
-        ///// <param name="KeyValue">The Value Key to use. Length must be six</param>
-        ///// <returns></returns>
-        //public ACR122U_ResposeErrorCodes LoadAthenticationKeys(ACR122U_Keys Key, byte[] KeyValue)
-        //{
-
-        //}
-
-        ///// <summary>
-        ///// Uses prev loaded Athentication Keys to Athenticate
-        ///// </summary>
-        ///// <param name="Key">A enumeration as A or B</param>
-        ///// <param name="KeyToUse">A enumeration as 1 or 2 for posible memory locations</param>
-        ///// <returns></returns>
-        //public ACR122U_ResposeErrorCodes Athentication(byte BlockToAthenticate, ACR122U_Keys Key, ACR122U_KeyMemories KeyToUse)
-        //{
-
-        //}
-
-        ///// <summary>
-        ///// Uses prev loaded Athentication Keys to Athenticate
-        ///// </summary>
-        ///// <param name="Key">A enumeration as A or B</param>
-        ///// <param name="Key">A enumeration as A or B for if you want to match keys to memory(A is read key B is master)</param>
-        ///// <returns></returns>
-        //public ACR122U_ResposeErrorCodes Athentication(byte BlockToAthenticate, ACR122U_Keys Key, ACR122U_Keys KeyToUse)
-        //{
-
-        //}
-
-        ///// <summary>
-        ///// Reads a block
-        ///// </summary>
-        ///// <param name="DataOut">The data returned</param>
-        ///// <param name="BlockToRead">The block to read</param>
-        ///// <param name="NumberToRead">The number to read</param>
-        ///// <returns></returns>
-        //public ACR122U_ResposeErrorCodes ReadBlock(out byte[] DataOut, byte BlockToRead, byte NumberToRead = 16)
-        //{
-
-        //}
-
-        ///// <summary>
-        ///// Writes to a block. Note Must be athenticated with Key B first
-        ///// </summary>
-        ///// <param name="DataIn">Data to write </param>
-        ///// <param name="BlockToWrite">The Block to write the data to</param>
-        ///// <returns></returns>
-        //public ACR122U_ResposeErrorCodes WriteBlock(byte[] DataIn, byte BlockToWrite)
-        //{
-
-        //}
-
-        ///// <summary>
-        ///// Writes a 32 bit interger to the block
-        ///// </summary>
-        ///// <param name="Value">The number output</param>
-        ///// <param name="BlockToRead">The Block to Read from</param>
-        ///// <returns></returns>
-        //// dont believe the compiler it lies my int is bigger.....
-        //public ACR122U_ResposeErrorCodes ReadValueFromBlock(out Int32 Value, byte BlockToRead)
-        //{
-
-        //}
-
-        ///// <summary>
-        ///// Writes a 32 bit interger to the block
-        ///// </summary>
-        ///// <param name="Value">the number to write</param>
-        ///// <param name="BlockToWrite">The Block to write to</param>
-        ///// <returns></returns>
-        //public ACR122U_ResposeErrorCodes WriteValueToBlock(Int32 Value, byte BlockToWrite)
-        //{
-
-        //}
-
-        ///// <summary>
-        ///// Increment number
-        ///// </summary>
-        ///// <param name="Value">The amount to add</param>
-        ///// <param name="BlockToIncrement">The block to add to</param>
-        ///// <returns></returns>
-        //public ACR122U_ResposeErrorCodes IncrementValue(Int32 Value, byte BlockToIncrement)
-        //{
-
-        //}
-
-        ///// <summary>
-        ///// decrement number
-        ///// </summary>
-        ///// <param name="Value">The amount to subtract</param>
-        ///// <param name="BlockToDecrement">The block to subtract to</param>
-        ///// <returns></returns>
-        //public ACR122U_ResposeErrorCodes DecrementValue(Int32 Value, byte BlockToDecrement)
-        //{
-
-        //}
-
-        ///*Copy
-        //*Send 
-        //FF D7 00 00 02 03 00
-        //or
-        //FF D7 00 [SourceBlock] 02 03 [TargetBlock]
-        //*Returns
-        //90 00
-        //*/
-        ///// <summary>
-        ///// Copies one block to another
-        ///// </summary>
-        ///// <param name="SourceBlock">Source Block copy from</param>
-        ///// <param name="TargetBlock">Target Block copy to</param>
-        ///// <returns></returns>
-        //public ACR122U_ResposeErrorCodes Copy(byte SourceBlock, byte TargetBlock)
-        //{
-        //    if(Card != null)
-        //        return Card.Copy(SourceBlock, TargetBlock);
-        //    return ACR122U_ResposeErrorCodes.
-        //}
-
-        #endregion
-        #endregion
         public void Dispose()
         {
             LetListenerThreadEnd = true;

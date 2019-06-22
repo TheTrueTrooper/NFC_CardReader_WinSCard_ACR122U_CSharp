@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NFC_CardReader.WinSCard;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,7 +21,7 @@ namespace NFC_CardReader.ACR122U
             ACRErrorOnException = ACRErrorOnExceptionIn;
         }
 
-        internal ACR122U_SmartCardException(ACR122U_ResposeErrorCodes ACRErrorOnExceptionIn,  ErrorCodes ErrorOnExceptionIn) : base(ErrorOnExceptionIn, ACR122U_SmartCard.GetACRErrMsg(ACRErrorOnExceptionIn) + "\n\t" + WinSCard.GetScardErrMsg(ErrorOnExceptionIn))
+        internal ACR122U_SmartCardException(ACR122U_ResposeErrorCodes ACRErrorOnExceptionIn,  ErrorCodes ErrorOnExceptionIn) : base(ErrorOnExceptionIn, ACR122U_SmartCard.GetACRErrMsg(ACRErrorOnExceptionIn) + "\n\t" + WinSCard.WinSCard.GetScardErrMsg(ErrorOnExceptionIn))
         {
             ACRErrorOnException = ACRErrorOnExceptionIn;
         }

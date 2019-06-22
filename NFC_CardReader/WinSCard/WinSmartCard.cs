@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace NFC_CardReader
+namespace NFC_CardReader.WinSCard
 {
     /// <summary>
     /// A class to Wrap all the wincard dll in very C# friendly wrapping

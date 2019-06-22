@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NFC_CardReader
+namespace NFC_CardReader.WinSCard
 {
     public class WinSmartCardContext : IDisposable
     {

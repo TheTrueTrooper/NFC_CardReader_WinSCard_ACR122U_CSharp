@@ -3,9 +3,13 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using NFC_CardReader.CppToCSharpConversionHelpers;
+using NFC_CardReader.WinSCard;
 
 namespace NFC_CardReader.ACR122U
 {
+    /// <summary>
+    /// a API that wraps the Wincard API
+    /// </summary>
     public class ACR122U_SmartCard : WinSmartCard
     {
         /// <summary>
@@ -306,6 +310,26 @@ namespace NFC_CardReader.ACR122U
             else
                 throw new ACR122U_SmartCardException(ACR122U_ResposeErrorCodes.APIError, ErrorCodes.SCARD_S_SUCCESS);
         }
+
+        /// <summary>
+        /// Gets the Status from the ACR122 using its internal method
+        /// </summary>
+        /// <param name="ACR122U_Status">A container with all of the status</param>
+        /// <returns></returns>
+        public static ACR122U_ResposeErrorCodes GetStatusStatic(WinSmartCardContext Context, out ACR122U_Status ACR122U_Status)
+        {
+            bool Card;
+            ACR122U_StatusErrorCodes ErrorCode;
+            bool FieldPresent;
+            byte NumberOfTargets;
+            byte LogicalNumber;
+            ACR122U_StatusBitRateInReception BitRateInReception;
+            ACR122U_StatusBitsRateInTransmiton BitRateInTransmition;
+            ACR122U_StatusModulationType ModulationType;
+            ACR122U_ResposeErrorCodes Error = GetStatusStatic(Context, out Card, out ErrorCode, out FieldPresent, out NumberOfTargets, out LogicalNumber, out BitRateInReception, out BitRateInTransmition, out ModulationType);
+            ACR122U_Status = new ACR122U_Status(Card, ErrorCode, FieldPresent, NumberOfTargets, LogicalNumber, BitRateInReception, BitRateInTransmition, ModulationType);
+            return Error;
+        }
         #endregion
 
         /*Turn On/Off anntenna (Couldnt Figure out what this was actually doing out actually)
@@ -603,6 +627,26 @@ namespace NFC_CardReader.ACR122U
             ModulationType = ACR122U_StatusModulationType.NoCardDetected;
             LastACRResultCode = ACR122U_ResposeErrorCodes.Success;
             return LastACRResultCode;
+        }
+
+        /// <summary>
+        /// Gets the Status from the ACR122 using its internal method
+        /// </summary>
+        /// <param name="ACR122U_Status">A container with all of the status</param>
+        /// <returns></returns>
+        public ACR122U_ResposeErrorCodes GetStatus(out ACR122U_Status ACR122U_Status)
+        {
+            bool Card;
+            ACR122U_StatusErrorCodes ErrorCode;
+            bool FieldPresent;
+            byte NumberOfTargets;
+            byte LogicalNumber;
+            ACR122U_StatusBitRateInReception BitRateInReception;
+            ACR122U_StatusBitsRateInTransmiton BitRateInTransmition;
+            ACR122U_StatusModulationType ModulationType;
+            ACR122U_ResposeErrorCodes Error = GetStatus(out Card, out ErrorCode, out FieldPresent, out NumberOfTargets, out LogicalNumber, out BitRateInReception, out BitRateInTransmition, out ModulationType);
+            ACR122U_Status = new ACR122U_Status(Card, ErrorCode, FieldPresent, NumberOfTargets, LogicalNumber, BitRateInReception, BitRateInTransmition, ModulationType);
+            return Error;
         }
 
         #endregion

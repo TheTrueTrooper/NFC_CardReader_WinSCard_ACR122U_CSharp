@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NFC_CardReader
+namespace NFC_CardReader.WinSCard
 {
     /// <summary>
     /// An exception to throw in regards to errors from the wincard dll

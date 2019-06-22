@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NFC_CardReader
+namespace NFC_CardReader.WinSCard
 {
     /// <summary>
     /// A C# friendly outside cover for SCARD_READERSTATE

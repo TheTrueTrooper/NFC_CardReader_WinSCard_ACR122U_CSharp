@@ -52,6 +52,7 @@
     <Compile Include="ACR122U\ACR122U_SmartCard.cs" />
     <Compile Include="ACR122U\ACR122U_ResposeErrorCodes.cs" />
     <Compile Include="ACR122U\ACR122U_SmartCardException.cs" />
+    <Compile Include="ACR122U\ACR122U_Status.cs" />
     <Compile Include="ACR122U\ControlEnums\ACR122U_KeyNumbers.cs" />
     <Compile Include="ACR122U\ControlEnums\ACR122U_Keys.cs" />
     <Compile Include="ACR122U\ControlEnums\ACR122U_PICCOperatingParametersControl.cs" />

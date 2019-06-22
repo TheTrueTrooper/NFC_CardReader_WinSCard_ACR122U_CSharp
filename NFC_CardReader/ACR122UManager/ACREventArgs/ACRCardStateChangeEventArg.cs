@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NFC_CardReader.WinSCard;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;

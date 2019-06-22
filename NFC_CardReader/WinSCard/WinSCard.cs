@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace NFC_CardReader
+namespace NFC_CardReader.WinSCard
 {
     /// <summary>
     /// A class for the raw import of SCARD_IO_REQUEST
