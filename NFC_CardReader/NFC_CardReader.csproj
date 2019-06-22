@@ -42,6 +42,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ACR122UManager\ACR122UManager.cs" />
+    <Compile Include="ACR122UManager\ACREventArgs\ACRCardAcceptedCardScanEventArg.cs" />
+    <Compile Include="ACR122UManager\ACREventArgs\ACRCardRejectedCardScanEventArg.cs" />
+    <Compile Include="ACR122UManager\ACREventArgs\ACRCardDetectedEventArg.cs" />
+    <Compile Include="ACR122UManager\ACREventArgs\ACRCardRemovedEventArg.cs" />
+    <Compile Include="ACR122UManager\ACREventArgs\ACRCardStateChangeEventArg.cs" />
+    <Compile Include="ACR122UManager\Events.cs" />
     <Compile Include="ACR122U\ACR122U_SmartCard.cs" />
     <Compile Include="ACR122U\ACR122U_ResposeErrorCodes.cs" />
     <Compile Include="ACR122U\ACR122U_SmartCardException.cs" />

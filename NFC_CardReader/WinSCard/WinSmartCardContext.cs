@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace NFC_CardReader
 {
-    public class WinSmartCardContext //: IDisposable
+    public class WinSmartCardContext : IDisposable
     {
         /// <summary>
         /// A Pointer to the a context as an int since C# doesn't really directly reference it
