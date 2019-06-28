@@ -286,7 +286,7 @@ namespace NFC_CardReader.ACR122U
             NumberOfTargets = Data[4];
             //required as data length doesnt change but some data is droped while leaving trailing 0s to force length of the same
             //if a card is returned with a card this is the values 
-            if (Data[9] == 0x80 && Data[10] == 0x90 && Data[11] == 0x00)
+            if (Data.Length == 12 && Data[9] == 0x80 && Data[10] == 0x90 && Data[11] == 0x00)
             {
                 Card = true;
                 LogicalNumber = Data[5];
@@ -297,7 +297,7 @@ namespace NFC_CardReader.ACR122U
                 return ACR122U_ResposeErrorCodes.Success;
             }
             //if a card is returned with out card this is the values
-            else if (Data[5] == 0x80 && Data[6] == 0x90 && Data[7] == 0x00)
+            else if (Data.Length == 8 && Data[5] == 0x80 && Data[6] == 0x90 && Data[7] == 0x00)
             {
                 Card = false;
                 LogicalNumber = 0;
