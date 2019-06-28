@@ -148,35 +148,36 @@ namespace NFC_CardReader.ACR122UManager
         #endregion
 
         #region CardReaderSudoADPUReaderComands
-        /// <summary>
-        /// Turns RFID anntenna On
-        /// </summary>
-        /// <returns></returns>
-        public void TurnAnntennaOn()
-        {
-            ACR122U_ResposeErrorCodes Error;
-            if (Card == null)
-                Error = ACR122U_SmartCard.TurnAnntennaOnStatic(Context);
-            else
-                Error = Card.TurnAnntennaOn();
-            if (Error != ACR122U_ResposeErrorCodes.Success)
-                throw new ACR122U_SmartCardException(Error, ErrorCodes.SCARD_S_SUCCESS);
-        }
+        //ACS has deperecated both of these commands in the newer API 
+        ///// <summary>
+        ///// Turns RFID anntenna On
+        ///// </summary>
+        ///// <returns></returns>
+        //public void TurnAnntennaOn()
+        //{
+        //    ACR122U_ResposeErrorCodes Error;
+        //    if (Card == null)
+        //        Error = ACR122U_SmartCard.TurnAnntennaOnStatic(Context);
+        //    else
+        //        Error = Card.TurnAnntennaOn();
+        //    if (Error != ACR122U_ResposeErrorCodes.Success)
+        //        throw new ACR122U_SmartCardException(Error, ErrorCodes.SCARD_S_SUCCESS);
+        //}
 
-        /// <summary>
-        /// Turns RFID anntenna off
-        /// </summary>
-        /// <returns></returns>
-        public void TurnAnntennaOff()
-        {
-            ACR122U_ResposeErrorCodes Error;
-            if (Card == null)
-                Error = ACR122U_SmartCard.TurnAnntennaOffStatic(Context);
-            else
-                Error = Card.TurnAnntennaOff();
-            if (Error != ACR122U_ResposeErrorCodes.Success)
-                throw new ACR122U_SmartCardException(Error, ErrorCodes.SCARD_S_SUCCESS);
-        }
+        ///// <summary>
+        ///// Turns RFID anntenna off
+        ///// </summary>
+        ///// <returns></returns>
+        //public void TurnAnntennaOff()
+        //{
+        //    ACR122U_ResposeErrorCodes Error;
+        //    if (Card == null)
+        //        Error = ACR122U_SmartCard.TurnAnntennaOffStatic(Context);
+        //    else
+        //        Error = Card.TurnAnntennaOff();
+        //    if (Error != ACR122U_ResposeErrorCodes.Success)
+        //        throw new ACR122U_SmartCardException(Error, ErrorCodes.SCARD_S_SUCCESS);
+        //}
 
         /// <summary>
         /// Gets the Opperating params of system

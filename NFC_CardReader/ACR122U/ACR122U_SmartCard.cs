@@ -94,37 +94,38 @@ namespace NFC_CardReader.ACR122U
         #region DeviceSpecificCommandsPseudoAPDU
 
         #region CardLessVers
-        /// <summary>
-        /// Turns RFID anntenna On with out need of card
-        /// </summary>
-        /// <returns></returns>
-        public static ACR122U_ResposeErrorCodes TurnAnntennaOnStatic(WinSmartCardContext Context)
-        {
-            bool HasCard;
-            byte[] DataOut;
+        //ACS has deperecated both of these commands in the newer API 
+        ///// <summary>
+        ///// Turns RFID anntenna On with out need of card
+        ///// </summary>
+        ///// <returns></returns>
+        //public static ACR122U_ResposeErrorCodes TurnAnntennaOnStatic(WinSmartCardContext Context)
+        //{
+        //    bool HasCard;
+        //    byte[] DataOut;
 
-            byte[] CommandAsBytes = new byte[7] { 0xFF, 0x00, 0x00, 0x00, 0x04, 0xD4, 0x01 };
+        //    byte[] CommandAsBytes = new byte[7] { 0xFF, 0x00, 0x00, 0x00, 0x04, 0xD4, 0x01 };
 
-            Context.Control(CommandAsBytes, out DataOut, out HasCard);
+        //    Context.Control(CommandAsBytes, out DataOut, out HasCard);
 
-            return RetrieveDataCodes(ref DataOut);
-        }
+        //    return RetrieveDataCodes(ref DataOut);
+        //}
 
-        /// <summary>
-        /// Turns RFID anntenna off with out need of card
-        /// </summary>
-        /// <returns></returns>
-        public static ACR122U_ResposeErrorCodes TurnAnntennaOffStatic(WinSmartCardContext Context)
-        {
-            bool HasCard;
-            byte[] DataOut;
+        ///// <summary>
+        ///// Turns RFID anntenna off with out need of card
+        ///// </summary>
+        ///// <returns></returns>
+        //public static ACR122U_ResposeErrorCodes TurnAnntennaOffStatic(WinSmartCardContext Context)
+        //{
+        //    bool HasCard;
+        //    byte[] DataOut;
 
-            byte[] CommandAsBytes = new byte[7] { 0xFF, 0x00, 0x00, 0x00, 0x04, 0xD4, 0x00 };
+        //    byte[] CommandAsBytes = new byte[7] { 0xFF, 0x00, 0x00, 0x00, 0x04, 0xD4, 0x00 };
 
-            Context.Control(CommandAsBytes, out DataOut, out HasCard);
+        //    Context.Control(CommandAsBytes, out DataOut, out HasCard);
 
-            return RetrieveDataCodes(ref DataOut);
-        }
+        //    return RetrieveDataCodes(ref DataOut);
+        //}
 
         /// <summary>
         /// Gets the Opperating params of system
@@ -331,50 +332,50 @@ namespace NFC_CardReader.ACR122U
             return Error;
         }
         #endregion
-
+        //ACS has deperecated both of these commands in the newer API 
         /*Turn On/Off anntenna (Couldnt Figure out what this was actually doing out actually)
         *Send 
         FF 00 00 00 04 D4 [000<?:1=on,0=off>]
         *Returns
         D5 33 90 00 for success(90 00)
         */
-        /// <summary>
-        /// Turns RFID anntenna On
-        /// </summary>
-        /// <returns></returns>
-        public ACR122U_ResposeErrorCodes TurnAnntennaOn()
-        {
-            byte[] DataOut;
+        ///// <summary>
+        ///// Turns RFID anntenna On
+        ///// </summary>
+        ///// <returns></returns>
+        //public ACR122U_ResposeErrorCodes TurnAnntennaOn()
+        //{
+        //    byte[] DataOut;
 
-            byte[] CommandAsBytes = new byte[7] { 0xFF, 0x00, 0x00, 0x00, 0x04, 0xD4, 0x01 };
+        //    byte[] CommandAsBytes = new byte[7] { 0xFF, 0x00, 0x00, 0x00, 0x04, 0xD4, 0x01 };
 
-            TransmitData(CommandAsBytes, out DataOut);
+        //    TransmitData(CommandAsBytes, out DataOut);
 
-            LastACRResultCode = RetrieveDataCodes(ref DataOut);
-            return LastACRResultCode;
-        }
+        //    LastACRResultCode = RetrieveDataCodes(ref DataOut);
+        //    return LastACRResultCode;
+        //}
 
-        /*Turn On/Off anntenna (Couldnt Figure out what this was actually doing out actually)
-        *Send 
-        FF 00 00 00 04 D4 [000<?:1=on,0=off>]
-        *Returns
-        D5 33 90 00 for success(90 00)
-        */
-        /// <summary>
-        /// Turns RFID anntenna off
-        /// </summary>
-        /// <returns></returns>
-        public ACR122U_ResposeErrorCodes TurnAnntennaOff()
-        {
-            byte[] DataOut;
+        ///*Turn On/Off anntenna (Couldnt Figure out what this was actually doing out actually)
+        //*Send 
+        //FF 00 00 00 04 D4 [000<?:1=on,0=off>]
+        //*Returns
+        //D5 33 90 00 for success(90 00)
+        //*/
+        ///// <summary>
+        ///// Turns RFID anntenna off
+        ///// </summary>
+        ///// <returns></returns>
+        //public ACR122U_ResposeErrorCodes TurnAnntennaOff()
+        //{
+        //    byte[] DataOut;
 
-            byte[] CommandAsBytes = new byte[7] { 0xFF, 0x00, 0x00, 0x00, 0x04, 0xD4, 0x00 };
+        //    byte[] CommandAsBytes = new byte[7] { 0xFF, 0x00, 0x00, 0x00, 0x04, 0xD4, 0x00 };
 
-            TransmitData(CommandAsBytes, out DataOut);
+        //    TransmitData(CommandAsBytes, out DataOut);
 
-            LastACRResultCode = RetrieveDataCodes(ref DataOut);
-            return LastACRResultCode;
-        }
+        //    LastACRResultCode = RetrieveDataCodes(ref DataOut);
+        //    return LastACRResultCode;
+        //}
 
         /*Get PICC Operating Parameter state
         *Send 

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using NFC_CardReader;
 using NFC_CardReader.ACR122U;
@@ -291,9 +292,11 @@ namespace CardReader_TestConsole
         {
             byte[] AcceptedATR = new byte[] { 0x3B, 0x8F, 0x80, 0x01, 0x80, 0x4F, 0x0C, 0xA0, 0x00, 0x00, 0x03, 0x06, 0x03, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x6A };
             ACR122UManager Manager = new ACR122UManager(ACR122UManager.GetACR122UReaders().FirstOrDefault());
-            byte Data;
             ACR122U_Status Status;
             Manager.GetStatus(out Status);
+            ACR122U_PICCOperatingParametersControl ControlOptions = ACR122U_PICCOperatingParametersControl.AllOn;
+            Manager.SetPICCOperatingParameterState(ref ControlOptions);
+            Console.WriteLine("PIC options:\n" + ControlOptions);
             Console.WriteLine("Starting Status:\n\tCard: " + Status.Card + "\n\tError: " + Status.ErrorCode);
             ACR122UManager.GlobalCardCheck = (e) =>
             {
@@ -417,8 +420,6 @@ namespace CardReader_TestConsole
                     #endregion
 
                     Manager.DisconnectToCard();
-
-
 
                 }
 
