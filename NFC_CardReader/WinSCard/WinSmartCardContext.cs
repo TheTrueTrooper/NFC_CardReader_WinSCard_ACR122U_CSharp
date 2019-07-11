@@ -34,7 +34,7 @@ namespace NFC_CardReader.WinSCard
         /// </summary>
         public ErrorCodes LastResultCode { get; protected set; } = ErrorCodes.SCARD_S_SUCCESS;
 
-        bool Disposed = false;
+        public bool Disposed { get; protected set; } = false;
 
         /// <summary>
         /// Creates a connect at the use scope requested

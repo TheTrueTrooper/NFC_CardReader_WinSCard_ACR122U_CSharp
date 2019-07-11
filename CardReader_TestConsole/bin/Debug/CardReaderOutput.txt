@@ -1,0 +1,248 @@
+PIC options:
+AllOn
+Starting Status:
+	Card: False
+	Error: ACR122U_Error_NoError
+CardReader has detected Card
+State Enum : 1507362
+State as Hex : 170022
+ATR : 3B-8F-80-01-80-4F-0C-A0-00-00-03-06-03-00-01-00-00-00-00-6A
+CardReader has accepted Card
+State Enum : 1507362
+State as Hex : 170022
+ATR : 3B-8F-80-01-80-4F-0C-A0-00-00-03-06-03-00-01-00-00-00-00-6A
+	Card Conneted
+	UDI: A9-2C-7E-01
+	Loading athentication Keys to Key Memory 1: 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+	Athentication Key B (Read/Write Key) to Key Memory 1: 
+	Attempting to write block 5 (sector 1, block 1) All 0xFF: 
+	Attempting to read block 5 (sector 1, block 1): 
+		Data: FF-FF-FF-FF-FF-FF-FF-FF-FF-FF-FF-FF-FF-FF-FF-FF
+	Attempting to write block 5 (sector 1, block 1) All 0x00: 
+	Attempting to read block 5 (sector 1, block 1): 
+		Data: 00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00
+	Attempting to write value to block 5 (sector 1, block 1) Value = 5: 
+	Attempting to read value from block 5 (sector 1, block 1) Value ?= 5: 
+		Data: 5
+	Attempting to write value to block 5 (sector 1, block 1) Value = 0: 
+	Attempting to read value from block 5 (sector 1, block 1) Value ?= 0: 
+		Data: 0
+	Attempting to increment value at block 5 (sector 1, block 1): 
+	Attempting to read value from block 5 (sector 1, block 1) Value ?= 1: 
+		Data: 1
+	Attempting to decrement value at block 5 block 5 (sector 1, block 1): 
+	Attempting to read value from block 5 (sector 1, block 1) Value ?= 0: 
+		Data: 0
+	Attempting to increment value at block 5 (sector 1, block 1): 
+	Attempting to read value from block 5 (sector 1, block 1) Value ?= 1: 
+		Data: 1
+	Attempting to copy value at block 5 to block 4 (sector 1, block 1 => sector 1, block 0): 
+	Attempting to read value from block 5 (sector 1, block 1) Value: 
+		Data: 1
+	Attempting to read value from block 4 (sector 1, block 1) Value[4] ?= Value[5]: 
+		Data: 1
+CardReaders state has changed
+State Enum : 1507362
+State as Hex : 170022
+ATR : 3B-8F-80-01-80-4F-0C-A0-00-00-03-06-03-00-01-00-00-00-00-6A
+CardReader has removed Card
+State Enum : 1572882
+State as Hex : 180012
+ATR : 
+CardReaders state has changed
+State Enum : 1572882
+State as Hex : 180012
+ATR : 
+CardReader has detected Card
+State Enum : 1638434
+State as Hex : 190022
+ATR : 3B-8F-80-01-80-4F-0C-A0-00-00-03-06-03-00-01-00-00-00-00-6A
+CardReader has accepted Card
+State Enum : 1638434
+State as Hex : 190022
+ATR : 3B-8F-80-01-80-4F-0C-A0-00-00-03-06-03-00-01-00-00-00-00-6A
+	Card Conneted
+	UDI: A9-2C-7E-01
+	Loading athentication Keys to Key Memory 1: 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+	Athentication Key B (Read/Write Key) to Key Memory 1: 
+	Attempting to write block 5 (sector 1, block 1) All 0xFF: 
+	Attempting to read block 5 (sector 1, block 1): 
+		Data: FF-FF-FF-FF-FF-FF-FF-FF-FF-FF-FF-FF-FF-FF-FF-FF
+	Attempting to write block 5 (sector 1, block 1) All 0x00: 
+	Attempting to read block 5 (sector 1, block 1): 
+		Data: 00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00
+	Attempting to write value to block 5 (sector 1, block 1) Value = 5: 
+	Attempting to read value from block 5 (sector 1, block 1) Value ?= 5: 
+		Data: 5
+	Attempting to write value to block 5 (sector 1, block 1) Value = 0: 
+	Attempting to read value from block 5 (sector 1, block 1) Value ?= 0: 
+		Data: 0
+	Attempting to increment value at block 5 (sector 1, block 1): 
+	Attempting to read value from block 5 (sector 1, block 1) Value ?= 1: 
+		Data: 1
+	Attempting to decrement value at block 5 block 5 (sector 1, block 1): 
+	Attempting to read value from block 5 (sector 1, block 1) Value ?= 0: 
+		Data: 0
+	Attempting to increment value at block 5 (sector 1, block 1): 
+	Attempting to read value from block 5 (sector 1, block 1) Value ?= 1: 
+		Data: 1
+	Attempting to copy value at block 5 to block 4 (sector 1, block 1 => sector 1, block 0): 
+	Attempting to read value from block 5 (sector 1, block 1) Value: 
+		Data: 1
+	Attempting to read value from block 4 (sector 1, block 1) Value[4] ?= Value[5]: 
+		Data: 1
+CardReaders state has changed
+State Enum : 1638434
+State as Hex : 190022
+ATR : 3B-8F-80-01-80-4F-0C-A0-00-00-03-06-03-00-01-00-00-00-00-6A
+CardReader has removed Card
+State Enum : 1703954
+State as Hex : 1a0012
+ATR : 
+CardReaders state has changed
+State Enum : 1703954
+State as Hex : 1a0012
+ATR : 
+
+
+Notes of normal flow:
+//Create a list of what you need for cards or a system to vet the cards
+byte[] AcceptedATR = new byte[] { 0x3B, 0x8F, 0x80, 0x01, 0x80, 0x4F, 0x0C, 0xA0, 0x00, 0x00, 0x03, 0x06, 0x03, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x6A };
+//Set Global check with a shared static var
+ACR122UManager.GlobalCardCheck = (e) =>
+            {
+                bool CeckSuccess = false;
+                if (e.ATR.Length == AcceptedATR.Length)
+                {
+                    CeckSuccess = true;
+                    for (int i = 0; i < e.ATR.Length; i++)
+                    {
+                        if(e.ATR[i] != AcceptedATR[i])
+                        {
+                            CeckSuccess = false;
+                            break;
+                        }
+                    }
+                }
+                return CeckSuccess;
+            };
+//Get a list of card reader names we can use
+ACR122UManager.GetACR122UReaders().FirstOrDefault()
+//Use one to create a reader manager
+ACR122UManager Manager = new ACR122UManager(ACR122UManager.GetACR122UReaders().FirstOrDefault());
+//turn on the Card check 
+Manager.CheckCard = true;
+//Set event delagates
+Manager.AcceptedCardScaned += Test.TestAccept; // most important
+Manager.CardStateChanged += Test.TestStateChange;
+Manager.RejectedCardScaned += Test.TestRejected;
+Manager.CardDetected += Test.TestCardDetected;
+Manager.CardRemoved += Test.TestCardRemoved;
+//wait for operations to finish
+
+Addtional notes: 
+All classes support IDisposable and can be using statement wrapped.
+
+
+PIC options:
+AllOn
+Starting Status:
+	Card: False
+	Error: ACR122U_Error_NoError
+CardReader has detected Card
+State Enum : 327714
+State as Hex : 50022
+ATR : 3B-8F-80-01-80-4F-0C-A0-00-00-03-06-03-00-01-00-00-00-00-6A
+CardReader has accepted Card
+State Enum : 327714
+State as Hex : 50022
+ATR : 3B-8F-80-01-80-4F-0C-A0-00-00-03-06-03-00-01-00-00-00-00-6A
+	Card Conneted
+	UDI: A9-2C-7E-01
+	Loading athentication Keys to Key Memory 1: 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+	Athentication Key B (Read/Write Key) to Key Memory 1: 
+	Attempting to write block 5 (sector 1, block 1) All 0xFF: 
+	Attempting to read block 5 (sector 1, block 1): 
+	Data: 00-FF-FF-FF-FF-FF-FF-FF-FF-FF-FF-FF-FF-FF-FF-FF
+	Attempting to write block 5 (sector 1, block 1) All 0x00: 
+	Attempting to read block 5 (sector 1, block 1): 
+	Data: 00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00
+	Attempting to write value to block 5 (sector 1, block 1) Value = 5: 
+	Attempting to read value from block 5 (sector 1, block 1) Value ?= 5: 
+		Data: 5
+	Attempting to write value to block 5 (sector 1, block 1) Value = 0: 
+	Attempting to read value from block 5 (sector 1, block 1) Value ?= 0: 
+		Data: 0
+	Attempting to increment value at block 5 (sector 1, block 1): 
+	Attempting to read value from block 5 (sector 1, block 1) Value ?= 1: 
+		Data: 1
+	Attempting to decrement value at block 5 block 5 (sector 1, block 1): 
+	Attempting to read value from block 5 (sector 1, block 1) Value ?= 0: 
+		Data: 0
+	Attempting to increment value at block 5 (sector 1, block 1): 
+	Attempting to read value from block 5 (sector 1, block 1) Value ?= 1: 
+		Data: 1
+	Attempting to copy value at block 5 to block 4 (sector 1, block 1 => sector 1, block 0): 
+	Attempting to read value from block 5 (sector 1, block 1) Value: 
+		Data: 1
+	Attempting to read value from block 4 (sector 1, block 1) Value[4] ?= Value[5]: 
+		Data: 1
+CardReaders state has changed
+State Enum : 327714
+State as Hex : 50022
+ATR : 3B-8F-80-01-80-4F-0C-A0-00-00-03-06-03-00-01-00-00-00-00-6A
+CardReader has removed Card
+State Enum : 393234
+State as Hex : 60012
+ATR : 
+CardReaders state has changed
+State Enum : 393234
+State as Hex : 60012
+ATR : 
+PIC options:
+AllOn
+Starting Status:
+	Card: False
+	Error: CommandNotAcceptableInContext
+CardReader has detected Card
+State Enum : 327714
+State as Hex : 50022
+ATR : 3B-8F-80-01-80-4F-0C-A0-00-00-03-06-03-00-01-00-00-00-00-6A
+CardReader has accepted Card
+State Enum : 327714
+State as Hex : 50022
+ATR : 3B-8F-80-01-80-4F-0C-A0-00-00-03-06-03-00-01-00-00-00-00-6A
+	Card Conneted
+	UDI: A9-2C-7E-01
+	Loading athentication Keys to Key Memory 1: 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+	Athentication Key B (Read/Write Key) to Key Memory 1: 
+	Attempting to write block 5 (sector 1, block 1) All 0xFF: 
+	Attempting to read block 5 (sector 1, block 1): 
+	Data: 00-FF-FF-FF-FF-FF-FF-FF-FF-FF-FF-FF-FF-FF-FF-FF
+	Attempting to write block 5 (sector 1, block 1) All 0x00: 
+	Attempting to read block 5 (sector 1, block 1): 
+	Data: 00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00
+	Attempting to write value to block 5 (sector 1, block 1) Value = 5: 
+	Attempting to read value from block 5 (sector 1, block 1) Value ?= 5: 
+		Data: 5
+	Attempting to write value to block 5 (sector 1, block 1) Value = 0: 
+	Attempting to read value from block 5 (sector 1, block 1) Value ?= 0: 
+		Data: 0
+	Attempting to increment value at block 5 (sector 1, block 1): 
+	Attempting to read value from block 5 (sector 1, block 1) Value ?= 1: 
+		Data: 1
+	Attempting to decrement value at block 5 block 5 (sector 1, block 1): 
+	Attempting to read value from block 5 (sector 1, block 1) Value ?= 0: 
+		Data: 0
+	Attempting to increment value at block 5 (sector 1, block 1): 
+	Attempting to read value from block 5 (sector 1, block 1) Value ?= 1: 
+		Data: 1
+	Attempting to copy value at block 5 to block 4 (sector 1, block 1 => sector 1, block 0): 
+	Attempting to read value from block 5 (sector 1, block 1) Value: 
+		Data: 1
+	Attempting to read value from block 4 (sector 1, block 1) Value[4] ?= Value[5]: 
+		Data: 1
+CardReaders state has changed
+State Enum : 327714
+State as Hex : 50022
+ATR : 3B-8F-80-01-80-4F-0C-A0-00-00-03-06-03-00-01-00-00-00-00-6A

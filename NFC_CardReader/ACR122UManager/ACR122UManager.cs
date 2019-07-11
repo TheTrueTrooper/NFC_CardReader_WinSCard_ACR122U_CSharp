@@ -100,9 +100,9 @@ namespace NFC_CardReader.ACR122UManager
         }
 
         /// <summary>
-        /// 
+        /// Gets a list of all of the valid ACS ACR122U readers but excludes the virtual PICC Interfaces as they are not required and were only introduced in a driver update.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>The list of valid driver interfaces</returns>
         public static List<string> GetACR122UReaders()
         {
             List<string> Names = WinSmartCardContext.ListReadersAsStringsStatic();
@@ -148,37 +148,6 @@ namespace NFC_CardReader.ACR122UManager
         #endregion
 
         #region CardReaderSudoADPUReaderComands
-        //ACS has deperecated both of these commands in the newer API 
-        ///// <summary>
-        ///// Turns RFID anntenna On
-        ///// </summary>
-        ///// <returns></returns>
-        //public void TurnAnntennaOn()
-        //{
-        //    ACR122U_ResposeErrorCodes Error;
-        //    if (Card == null)
-        //        Error = ACR122U_SmartCard.TurnAnntennaOnStatic(Context);
-        //    else
-        //        Error = Card.TurnAnntennaOn();
-        //    if (Error != ACR122U_ResposeErrorCodes.Success)
-        //        throw new ACR122U_SmartCardException(Error, ErrorCodes.SCARD_S_SUCCESS);
-        //}
-
-        ///// <summary>
-        ///// Turns RFID anntenna off
-        ///// </summary>
-        ///// <returns></returns>
-        //public void TurnAnntennaOff()
-        //{
-        //    ACR122U_ResposeErrorCodes Error;
-        //    if (Card == null)
-        //        Error = ACR122U_SmartCard.TurnAnntennaOffStatic(Context);
-        //    else
-        //        Error = Card.TurnAnntennaOff();
-        //    if (Error != ACR122U_ResposeErrorCodes.Success)
-        //        throw new ACR122U_SmartCardException(Error, ErrorCodes.SCARD_S_SUCCESS);
-        //}
-
         /// <summary>
         /// Gets the Opperating params of system
         /// </summary>
@@ -217,7 +186,6 @@ namespace NFC_CardReader.ACR122UManager
         /// [ISO14443TypeB:1=Detect,0=Ignore]
         /// [ISO14443TypeA:1=Detect,0=Ignore]
         /// </param>
-        /// <returns></returns>
         public void GetPICCOperatingParameterState(out ACR122U_PICCOperatingParametersControl SetInDataOut)
         {
             ACR122U_ResposeErrorCodes Error;
@@ -242,7 +210,6 @@ namespace NFC_CardReader.ACR122UManager
         /// [ISO14443TypeB:1=Detect,0=Ignore]
         /// [ISO14443TypeA:1=Detect,0=Ignore]
         /// </param>
-        /// <returns></returns>
         public void SetPICCOperatingParameterState(ref byte SetInDataOut)
         {
             ACR122U_ResposeErrorCodes Error;
@@ -267,7 +234,6 @@ namespace NFC_CardReader.ACR122UManager
         /// [ISO14443TypeB:1=Detect,0=Ignore]
         /// [ISO14443TypeA:1=Detect,0=Ignore]
         /// </param>
-        /// <returns></returns>
         public void SetPICCOperatingParameterState(ref ACR122U_PICCOperatingParametersControl SetInDataOut)
         {
             ACR122U_ResposeErrorCodes Error;
@@ -299,8 +265,7 @@ namespace NFC_CardReader.ACR122UManager
         /// [BuzzerOnT1Cycle(0x02):1=On,0=Off]
         /// [RedFinalState(0x01):1=On,0=Off]
         /// [BuzzerOnT12Cycle(0x01):1=On,0=Off]
-        /// <param name="DataOut">Some strange data that to this day I'm not sure of is incons only consi is the card comes on and of is +1</param>
-        /// <returns></returns>
+        /// <param name="DataOut">Some strange data. To this day I'm not sure of it is. It is inconsistant. The only inconsistant part is that if the card is put on then it sometime +1?</param>
         public void SetLEDandBuzzerControl(ACR122U_LEDControl LEDControl, byte T1Duration, byte T2Durration, byte TimesToRepeat, ACR122U_BuzzerControl BuzzerControl, out byte DataOut)
         {
             ACR122U_ResposeErrorCodes Error;
@@ -323,7 +288,6 @@ namespace NFC_CardReader.ACR122UManager
         /// <param name="BitRateInReception"></param>
         /// <param name="BitRateInTransmition"></param>
         /// <param name="ModulationType"></param>
-        /// <returns></returns>
         public void GetStatus(out bool Card, out ACR122U_StatusErrorCodes ErrorCode, out bool FieldPresent, out byte NumberOfTargets, out byte LogicalNumber, out ACR122U_StatusBitRateInReception BitRateInReception, out ACR122U_StatusBitsRateInTransmiton BitRateInTransmition, out ACR122U_StatusModulationType ModulationType)
         {
             ACR122U_ResposeErrorCodes Error;
@@ -339,7 +303,6 @@ namespace NFC_CardReader.ACR122UManager
         /// Gets the Status from the ACR122 using its internal method
         /// </summary>
         /// <param name="ACR122U_Status">A container with all of the status</param>
-        /// <returns></returns>
         public void GetStatus(out ACR122U_Status ACR122U_Status)
         {
             ACR122U_ResposeErrorCodes Error;
@@ -355,11 +318,10 @@ namespace NFC_CardReader.ACR122UManager
         #region MafireClassics
         #region Utilities
         /// <summary>
-        /// Gets the UID as bytes
+        /// Gets the Cards UID as bytes
         /// </summary>
         /// <param name="receivedUID">the UID</param>
-        /// <returns></returns>
-        public void GetcardUIDBytes(out byte[] receivedUID)//only for mifare 1k cards
+        public void GetCardUIDBytes(out byte[] receivedUID)//only for mifare 1k cards
         {
             if (Card == null)
                 throw new Exception("Card is not connected.");
@@ -370,10 +332,9 @@ namespace NFC_CardReader.ACR122UManager
         }
 
         /// <summary>
-        /// Gets the UID as as a string
+        /// Gets the Cards UID as as a string
         /// </summary>
-        /// <returns></returns>
-        public string GetcardUID()//only for mifare 1k cards
+        public string GetCardUID()//only for mifare 1k cards
         {
             return Card.GetcardUID();
         }
@@ -383,7 +344,6 @@ namespace NFC_CardReader.ACR122UManager
         /// </summary>
         /// <param name="Key">A enumeration as 1 or 2 for posible memory locations</param>
         /// <param name="KeyValue">The Key Value to use. Length must be six</param>
-        /// <returns></returns>
         public void LoadAthenticationKeys(ACR122U_KeyMemories Key, byte[] KeyValue)//only for mifare 1k cards
         {
             if (Card == null)
@@ -399,7 +359,6 @@ namespace NFC_CardReader.ACR122UManager
         /// </summary>
         /// <param name="Key">A enumeration as A or B for if you want to match keys to memory(A is read key B is master)</param>
         /// <param name="KeyValue">The Value Key to use. Length must be six</param>
-        /// <returns></returns>
         public void LoadAthenticationKeys(ACR122U_Keys Key, byte[] KeyValue)
         {
             if (Card == null)
@@ -415,7 +374,6 @@ namespace NFC_CardReader.ACR122UManager
         /// </summary>
         /// <param name="Key">A enumeration as A or B</param>
         /// <param name="KeyToUse">A enumeration as 1 or 2 for posible memory locations</param>
-        /// <returns></returns>
         public void Athentication(byte BlockToAthenticate, ACR122U_Keys Key, ACR122U_KeyMemories KeyToUse)
         {
             if (Card == null)
@@ -431,7 +389,6 @@ namespace NFC_CardReader.ACR122UManager
         /// </summary>
         /// <param name="Key">A enumeration as A or B</param>
         /// <param name="Key">A enumeration as A or B for if you want to match keys to memory(A is read key B is master)</param>
-        /// <returns></returns>
         public void Athentication(byte BlockToAthenticate, ACR122U_Keys Key, ACR122U_Keys KeyToUse)
         {
             if (Card == null)
@@ -441,6 +398,45 @@ namespace NFC_CardReader.ACR122UManager
             if (Error != ACR122U_ResposeErrorCodes.Success)
                 throw new ACR122U_SmartCardException(Error, ErrorCodes.SCARD_S_SUCCESS);
         }
+
+        #region DeperecatedCardReaderSudoADPUReaderComands
+        //ACS has deperecated both of these commands in the newer API 
+        ///// <summary>
+        ///// Turns RFID anntenna On
+        ///// </summary>
+        ///// <returns></returns>
+        //#warning You have re-enable a depreciated funtion TurnAnntennaOff that hardward no longer supports
+        //[Obsolete]
+        //public void TurnAnntennaOn()
+        //{
+        //    ACR122U_ResposeErrorCodes Error;
+        //    if (Card == null)
+        //        Error = ACR122U_SmartCard.TurnAnntennaOnStatic(Context);
+        //    else
+        //        Error = Card.TurnAnntennaOn();
+        //    if (Error != ACR122U_ResposeErrorCodes.Success)
+        //        throw new ACR122U_SmartCardException(Error, ErrorCodes.SCARD_S_SUCCESS);
+        //}
+
+        ///// <summary>
+        ///// Turns RFID anntenna off
+        ///// </summary>
+        ///// <returns></returns>
+        //#warning You have re-enable a depreciated funtion TurnAnntennaOff that hardward no longer supports
+        //[Obsolete] 
+        //public void TurnAnntennaOff()
+        //{
+        //    ACR122U_ResposeErrorCodes Error;
+        //    if (Card == null)
+        //        Error = ACR122U_SmartCard.TurnAnntennaOffStatic(Context);
+        //    else
+        //        Error = Card.TurnAnntennaOff();
+        //    if (Error != ACR122U_ResposeErrorCodes.Success)
+        //        throw new ACR122U_SmartCardException(Error, ErrorCodes.SCARD_S_SUCCESS);
+        //}
+        #endregion
+
+
         #endregion
 
         #region BlockRead&Writes
@@ -450,7 +446,6 @@ namespace NFC_CardReader.ACR122UManager
         /// <param name="DataOut">The data returned</param>
         /// <param name="BlockToRead">The block to read</param>
         /// <param name="NumberToRead">The number to read</param>
-        /// <returns></returns>
         public void ReadBlock(out byte[] DataOut, byte BlockToRead, byte NumberToRead = 16)
         {
             if (Card == null)
@@ -466,7 +461,6 @@ namespace NFC_CardReader.ACR122UManager
         /// </summary>
         /// <param name="DataIn">Data to write </param>
         /// <param name="BlockToWrite">The Block to write the data to</param>
-        /// <returns></returns>
         public void WriteBlock(byte[] DataIn, byte BlockToWrite)
         {
             if (Card == null)
@@ -565,7 +559,7 @@ namespace NFC_CardReader.ACR122UManager
         /// <summary>
         /// A private thread to use for polling
         /// </summary>
-        /// <param name="This"></param>
+        /// <param name="This">A ACR122U to manage it should be this managers reader</param>
         static void ListenerThreadFunction(object This)
         {
             //set everting up and pass our selves in
@@ -578,7 +572,7 @@ namespace NFC_CardReader.ACR122UManager
 
             bool LetEnd = false;
 
-            while (!LetEnd)
+            while (!LetEnd && Manager.Context.Disposed)
             {
                 //cpp blocking call untill the readers state has changed.
                 while (States[0].CurrentState == States[0].EventState)
@@ -601,11 +595,11 @@ namespace NFC_CardReader.ACR122UManager
         }
 
         /// <summary>
-        /// an private event for calling the other events on a state change
+        /// an protected event for calling the other events on a state change
         /// </summary>
-        /// <param name="sender"></param>
+        /// <param name="sender">/param>
         /// <param name="e"></param>
-        void CardStateChangedFunction(object sender, ACRCardStateChangeEventArg e)
+        protected void CardStateChangedFunction(object sender, ACRCardStateChangeEventArg e)
         {
             //on state change
             //check if there is a card
@@ -628,6 +622,11 @@ namespace NFC_CardReader.ACR122UManager
         public static string GetACRErrMsg(ACR122U_ResposeErrorCodes ReturnCode)
         {
             return ACR122U_SmartCard.GetACRErrMsg(ReturnCode);
+        }
+
+        public static string GetWinscardErrMsg(ErrorCodes ErrorCode)
+        {
+            return ACR122U_SmartCard.GetWinscardErrMsg(ErrorCode);
         }
 
         /// <summary>

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using NFC_CardReader;
 using NFC_CardReader.ACR122U;
 using NFC_CardReader.ACR122UManager;
+using System.IO;
 
 #region BaseTesting
 //#region WincardAPIImportTesting
@@ -284,7 +285,7 @@ using NFC_CardReader.ACR122UManager;
 //Console.ReadKey();
 #endregion
 
-namespace CardReader_TestConsole
+namespace CardReader_TestFileLogger
 {
     class Program
     {
@@ -292,12 +293,16 @@ namespace CardReader_TestConsole
         {
             byte[] AcceptedATR = new byte[] { 0x3B, 0x8F, 0x80, 0x01, 0x80, 0x4F, 0x0C, 0xA0, 0x00, 0x00, 0x03, 0x06, 0x03, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x6A };
             ACR122UManager Manager = new ACR122UManager(ACR122UManager.GetACR122UReaders().FirstOrDefault());
+            //
             ACR122U_Status Status;
             Manager.GetStatus(out Status);
+            //
             ACR122U_PICCOperatingParametersControl ControlOptions = ACR122U_PICCOperatingParametersControl.AllOn;
             Manager.SetPICCOperatingParameterState(ref ControlOptions);
+            //
             Console.WriteLine("PIC options:\n" + ControlOptions);
             Console.WriteLine("Starting Status:\n\tCard: " + Status.Card + "\n\tError: " + Status.ErrorCode);
+            //
             ACR122UManager.GlobalCardCheck = (e) =>
             {
                 bool CeckSuccess = false;
@@ -315,8 +320,11 @@ namespace CardReader_TestConsole
                 }
                 return CeckSuccess;
             };
+
             Manager.CheckCard = true;
+
             ManagerTest Test = new ManagerTest(Manager);
+
             Manager.AcceptedCardScaned += Test.TestAccept;
             Manager.CardStateChanged += Test.TestStateChange;
             Manager.RejectedCardScaned += Test.TestRejected;
@@ -326,8 +334,31 @@ namespace CardReader_TestConsole
 
         }
 
+        static class FileLogger
+        {
+            static readonly string Location = Environment.CurrentDirectory + "\\CardReaderOutput.txt";
+
+            public static void WriteLine(string Write)
+            {
+                using (StreamWriter SW = new StreamWriter(File.Open(Location, FileMode.Append)))
+                {
+                    SW.WriteLine(Write);
+                }
+            }
+
+            public static void WriteLine(string Write, params object[] obj)
+            {
+                using (StreamWriter SW = new StreamWriter(File.Open(Location, FileMode.Append)))
+                {
+                    SW.WriteLine(string.Format(Write, obj));
+                }
+            }
+
+        }
+
         public class ManagerTest
         {
+
             ACR122UManager Manager;
 
             public ManagerTest(ACR122UManager M)
@@ -355,17 +386,17 @@ namespace CardReader_TestConsole
                     #region BasicConnect
                     Manager.ConnectToCard();
                     Console.WriteLine("\tCard Conneted");
-                    Console.WriteLine("\tUDI: " + Manager.GetcardUID());
+                    Console.WriteLine("\tUDI: " + Manager.GetCardUID());
                     #endregion
 
                     #region ValueTesting
                     byte[] Data;
-                    Console.WriteLine("\tLoading athentication Keys to 1:");
+                    Console.WriteLine("\tLoading athentication Keys to Key Memory 1: 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF");
                     Manager.LoadAthenticationKeys(ACR122U_KeyMemories.Key1, new byte[6] { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF });
-                    Console.WriteLine("\tAthentication Key B to 1: ");
+                    Console.WriteLine("\tAthentication Key B (Read/Write Key) to Key Memory 1: ");
                     Manager.Athentication(5, ACR122U_Keys.KeyB, ACR122U_KeyMemories.Key1);
                     Console.WriteLine("\tAttempting to write block 5 (sector 1, block 1) All 0xFF: ");
-                    Manager.WriteBlock(new byte[16] { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF }, 5);
+                    Manager.WriteBlock(new byte[16] { 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF }, 5);
                     Console.WriteLine("\tAttempting to read block 5 (sector 1, block 1): ");
                     Manager.ReadBlock(out Data, 5);
                     Console.WriteLine("\tData: " + BitConverter.ToString(Data));
@@ -374,9 +405,9 @@ namespace CardReader_TestConsole
                     Console.WriteLine("\tAttempting to read block 5 (sector 1, block 1): ");
                     Manager.ReadBlock(out Data, 5);
                     Console.WriteLine("\tData: " + BitConverter.ToString(Data));
-                    //#endregion
+                    #endregion
 
-                    //#region Values
+                    #region Values
                     Int32 Data2;
                     Console.WriteLine("\tAttempting to write value to block 5 (sector 1, block 1) Value = 5: ");
                     Manager.WriteValueToBlock(5, 5);

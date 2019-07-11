@@ -240,6 +240,16 @@ namespace NFC_CardReader.WinSCard
         }
 
         /// <summary>
+        /// Gets the error code.
+        /// </summary>
+        /// <param name="ErrorCode"></param>
+        /// <returns></returns>
+        public static string GetWinscardErrMsg(ErrorCodes ErrorCode)
+        {
+            return WinSCard.GetScardErrMsg(ErrorCode);
+        }
+
+        /// <summary>
         /// Destroys Card and notifies parent
         /// </summary>
         public void Dispose()

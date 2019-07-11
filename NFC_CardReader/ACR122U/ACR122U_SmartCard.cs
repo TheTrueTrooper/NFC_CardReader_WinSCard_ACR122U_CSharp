@@ -94,11 +94,14 @@ namespace NFC_CardReader.ACR122U
         #region DeviceSpecificCommandsPseudoAPDU
 
         #region CardLessVers
+        #region Deperecated
         //ACS has deperecated both of these commands in the newer API 
         ///// <summary>
         ///// Turns RFID anntenna On with out need of card
         ///// </summary>
         ///// <returns></returns>
+        //#warning You have re-enable a depreciated funtion TurnAnntennaOff that hardward no longer supports
+        //[Obsolete]
         //public static ACR122U_ResposeErrorCodes TurnAnntennaOnStatic(WinSmartCardContext Context)
         //{
         //    bool HasCard;
@@ -115,6 +118,8 @@ namespace NFC_CardReader.ACR122U
         ///// Turns RFID anntenna off with out need of card
         ///// </summary>
         ///// <returns></returns>
+        //#warning You have re-enable a depreciated funtion TurnAnntennaOff that hardward no longer supports
+        //[Obsolete]
         //public static ACR122U_ResposeErrorCodes TurnAnntennaOffStatic(WinSmartCardContext Context)
         //{
         //    bool HasCard;
@@ -126,6 +131,7 @@ namespace NFC_CardReader.ACR122U
 
         //    return RetrieveDataCodes(ref DataOut);
         //}
+        #endregion
 
         /// <summary>
         /// Gets the Opperating params of system
@@ -297,7 +303,6 @@ namespace NFC_CardReader.ACR122U
 
                 return ACR122U_ResposeErrorCodes.Success;
             }
-            //if a card is returned with out card this is the values
             else if (Data.Length == 8 && Data[5] == 0x80 && Data[6] == 0x90 && Data[7] == 0x00)
             {
                 Card = false;
@@ -305,11 +310,10 @@ namespace NFC_CardReader.ACR122U
                 BitRateInReception = ACR122U_StatusBitRateInReception.NoReception;
                 BitRateInTransmition = ACR122U_StatusBitsRateInTransmiton.NoTransmiton;
                 ModulationType = ACR122U_StatusModulationType.NoCardDetected;
-
                 return ACR122U_ResposeErrorCodes.Success;
             }
-            else
-                throw new ACR122U_SmartCardException(ACR122U_ResposeErrorCodes.APIError, ErrorCodes.SCARD_S_SUCCESS);
+
+            throw new ACR122U_SmartCardException(ACR122U_ResposeErrorCodes.APIError, ErrorCodes.SCARD_S_SUCCESS, "API has recived a unexpected value back.");
         }
 
         /// <summary>
@@ -332,6 +336,8 @@ namespace NFC_CardReader.ACR122U
             return Error;
         }
         #endregion
+
+        #region Deperecated
         //ACS has deperecated both of these commands in the newer API 
         /*Turn On/Off anntenna (Couldnt Figure out what this was actually doing out actually)
         *Send 
@@ -355,7 +361,7 @@ namespace NFC_CardReader.ACR122U
         //    return LastACRResultCode;
         //}
 
-        ///*Turn On/Off anntenna (Couldnt Figure out what this was actually doing out actually)
+        //*Turn On/Off anntenna (Couldnt Figure out what this was actually doing out actually)
         //*Send 
         //FF 00 00 00 04 D4 [000<?:1=on,0=off>]
         //*Returns
@@ -365,6 +371,8 @@ namespace NFC_CardReader.ACR122U
         ///// Turns RFID anntenna off
         ///// </summary>
         ///// <returns></returns>
+        //#warning You have re-enable a depreciated funtion TurnAnntennaOff that hardward no longer supports
+        //[Obsolete]
         //public ACR122U_ResposeErrorCodes TurnAnntennaOff()
         //{
         //    byte[] DataOut;
@@ -376,6 +384,7 @@ namespace NFC_CardReader.ACR122U
         //    LastACRResultCode = RetrieveDataCodes(ref DataOut);
         //    return LastACRResultCode;
         //}
+        #endregion
 
         /*Get PICC Operating Parameter state
         *Send 
@@ -599,7 +608,7 @@ namespace NFC_CardReader.ACR122U
             ErrorCode = (ACR122U_StatusErrorCodes)Data[2];
             FieldPresent = Data[3] != 0;
             NumberOfTargets = Data[4];
-            if (Data[9]== 0x80 && Data[10] == 0x90 && Data[11] == 0x00)
+            if (Data.Length == 12 && Data[9]== 0x80 && Data[10] == 0x90 && Data[11] == 0x00)
             {
                 Card = true;
                 LogicalNumber = Data[5];
@@ -607,9 +616,10 @@ namespace NFC_CardReader.ACR122U
                 BitRateInTransmition = (ACR122U_StatusBitsRateInTransmiton)Data[7];
                 ModulationType = (ACR122U_StatusModulationType)Data[8];
 
-                return ACR122U_ResposeErrorCodes.Success;
+                LastACRResultCode = ACR122U_ResposeErrorCodes.Success;
+                return LastACRResultCode;
             }
-            else if (Data[5] == 0x80 && Data[6] == 0x90 && Data[7] == 0x00)
+            else if (Data.Length == 8 && Data[5] == 0x80 && Data[6] == 0x90 && Data[7] == 0x00)
             {
                 Card = false;
                 LogicalNumber = 0;
@@ -621,13 +631,7 @@ namespace NFC_CardReader.ACR122U
                 return LastACRResultCode;
             }
 
-            Card = false;
-            LogicalNumber = 0;
-            BitRateInReception = ACR122U_StatusBitRateInReception.NoReception;
-            BitRateInTransmition = ACR122U_StatusBitsRateInTransmiton.NoTransmiton;
-            ModulationType = ACR122U_StatusModulationType.NoCardDetected;
-            LastACRResultCode = ACR122U_ResposeErrorCodes.Success;
-            return LastACRResultCode;
+            throw new ACR122U_SmartCardException(ACR122U_ResposeErrorCodes.APIError, ErrorCodes.SCARD_S_SUCCESS, "API has recived a unexpected value back.");
         }
 
         /// <summary>

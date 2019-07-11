@@ -95,6 +95,10 @@ namespace NFC_CardReader.ACR122U
         /// <summary>
         /// The chip configured as target has been released by its initiator 2Ah ISO/IEC 14443-3B only: the ID of the card does not match, meaning that the expected card has been exchanged with another one.
         /// </summary>
-        IDOfCardMismatch = 0x29
+        IDOfCardMismatch = 0x29,
+        /// <summary>
+        /// The Error has occured at the API level
+        /// </summary>
+        APIError = 0xF00
     }
 }
