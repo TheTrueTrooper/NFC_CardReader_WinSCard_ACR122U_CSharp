@@ -77,10 +77,10 @@ namespace NFC_CardReader.WinSCard
         static extern int SCardListReaderGroupsImport(IntPtr hContext, ref string mzGroups, ref int pcchGroups);
         [DllImport("winscard.DLL", EntryPoint = "SCardListReadersA", CharSet = CharSet.Ansi)]
         static extern int SCardListReadersImport(IntPtr hContext, byte[] Groups, byte[] Readers, ref int pcchReaders);
-                                             //(SCARDCONTEXT hContext, LPSTR mszGroups,LPDWORD pcchGroups);
+        //(SCARDCONTEXT hContext, LPSTR mszGroups,LPDWORD pcchGroups);
         [DllImport("winscard.dll", EntryPoint = "SCardStatusA")]
         static extern int SCardStatusImport(IntPtr hCard, byte[] mszReaderNames, ref int pcchReaderLen, ref int pdwState, ref int pdwProtocol, byte[] pbAtr, ref int pcbAtrLen);
-                                      //(SCARDHANDLE hCard, LPSTR mszReaderNames, LPDWORD pcchReaderLen, LPDWORD pdwState, LPDWORD pdwProtocol, LPBYTE pbAtr, LPDWORD pcbAtrLen);
+        //(SCARDHANDLE hCard, LPSTR mszReaderNames, LPDWORD pcchReaderLen, LPDWORD pdwState, LPDWORD pdwProtocol, LPBYTE pbAtr, LPDWORD pcbAtrLen);
         [DllImport("winscard.dll", EntryPoint = "SCardEndTransaction")]
         static extern int SCardEndTransactionImport(IntPtr hCard, int Disposition);
         [DllImport("WinScard.dll", EntryPoint = "SCardTransmit")]
@@ -92,8 +92,11 @@ namespace NFC_CardReader.WinSCard
         //                                  (int hContext, int dwTime, SCARDREADER_STATE rgReaderState, int cReaders)
         [DllImport("winscard.dll", EntryPoint = "SCardGetAttrib")]
         static extern int SCardGetAttribImport(IntPtr hCard, int dwAttrId, byte[] pbAttr, ref int pcbAttrLen);
-                                    //(SCARDHANDLE hCard, DWORD dwAttrId, LPBYTE pbAttr, LPDWORD pcbAttrLen);
-         
+        //(SCARDHANDLE hCard, DWORD dwAttrId, LPBYTE pbAttr, LPDWORD pcbAttrLen);
+
+        [DllImport("winscard.dll", EntryPoint = "SCardCancel")]
+        static extern int SCardCancelImport(IntPtr hContext);
+
         /// <summary>
         /// C# Friendly quick wrapper Addtional wrapping can found at WinSmartCard and Win SmardCardContext
         /// </summary>
@@ -265,8 +268,13 @@ namespace NFC_CardReader.WinSCard
         /// <param name="AttrLen"></param>
         /// <returns></returns>
         internal static ErrorCodes SCardGetAttrib(IntPtr Card, SmartCardATR Attribute, byte[] AttrOut, ref int AttrLen)
-        { 
+        {
             return (ErrorCodes)SCardGetAttribImport(Card, (int)Attribute, AttrOut, ref AttrLen);
+        }
+
+        internal static ErrorCodes SCardCancel(IntPtr hContext)
+        {
+            return (ErrorCodes)SCardCancelImport(hContext);
         }
 
         /// <summary>

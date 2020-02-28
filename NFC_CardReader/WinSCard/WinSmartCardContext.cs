@@ -196,6 +196,17 @@ namespace NFC_CardReader.WinSCard
             return this.Card;
         }
 
+        public void CancelAllCommands()
+        {
+            if (Disposed)
+                throw new ObjectDisposedException("WinSmartCardContext");
+
+            LastResultCode = WinSCard.SCardCancel(Context);
+
+            if (LastResultCode != ErrorCodes.SCARD_S_SUCCESS)
+                throw new WinSCardException(LastResultCode);
+        }
+
         /// <summary>
         /// Notify for child card to notify parent of death
         /// </summary>
@@ -211,10 +222,12 @@ namespace NFC_CardReader.WinSCard
         {
             if (Card != null)
             {
+                CancelAllCommands();
                 Card.Dispose();
             }
             if (!Disposed)
             {
+                CancelAllCommands();
                 LastResultCode = WinSCard.SCardReleaseContext(_Context);
                 if (LastResultCode != ErrorCodes.SCARD_S_SUCCESS)
                     throw new WinSCardException(LastResultCode, WinSCard.GetScardErrMsg(LastResultCode) + "\nThrown clean up.");
@@ -229,10 +242,12 @@ namespace NFC_CardReader.WinSCard
         {
             if (Card != null)
             {
+                CancelAllCommands();
                 Card.Dispose();
             }
             if (!Disposed)
             {
+                CancelAllCommands();
                 LastResultCode = WinSCard.SCardReleaseContext(_Context);
                 if (LastResultCode != ErrorCodes.SCARD_S_SUCCESS)
                     throw new WinSCardException(LastResultCode, WinSCard.GetScardErrMsg(LastResultCode) + "\nThrown clean up.");
