@@ -572,7 +572,7 @@ namespace NFC_CardReader.ACR122UManager
 
             bool LetEnd = false;
 
-            while (!LetEnd && Manager.Context.Disposed)
+            while (!LetEnd && !Manager.Context.Disposed)
             {
                 //cpp blocking call untill the readers state has changed.
                 while (States[0].CurrentState == States[0].EventState)
@@ -635,8 +635,8 @@ namespace NFC_CardReader.ACR122UManager
         public void Dispose()
         {
             LetListenerThreadEnd = true;
-            Context?.Dispose();
             Card?.Dispose();
+            Context?.Dispose();
         }
     }
 }

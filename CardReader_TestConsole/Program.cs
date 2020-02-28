@@ -8,6 +8,7 @@ using NFC_CardReader;
 using NFC_CardReader.ACR122U;
 using NFC_CardReader.ACR122UManager;
 using System.IO;
+using NFC_CardReader.WinSCard;
 
 #region BaseTesting
 //#region WincardAPIImportTesting
@@ -311,7 +312,7 @@ namespace CardReader_TestFileLogger
                     CeckSuccess = true;
                     for (int i = 0; i < e.ATR.Length; i++)
                     {
-                        if(e.ATR[i] != AcceptedATR[i])
+                        if (e.ATR[i] != AcceptedATR[i])
                         {
                             CeckSuccess = false;
                             break;
@@ -330,6 +331,7 @@ namespace CardReader_TestFileLogger
             Manager.RejectedCardScaned += Test.TestRejected;
             Manager.CardDetected += Test.TestCardDetected;
             Manager.CardRemoved += Test.TestCardRemoved;
+            List<string> Names = WinSmartCardContext.ListReadersAsStringsStatic();
             Console.ReadKey();
 
         }

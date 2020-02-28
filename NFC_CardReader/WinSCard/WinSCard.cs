@@ -64,34 +64,34 @@ namespace NFC_CardReader.WinSCard
 
         // All of the imported DLL files
         [DllImport("winscard.dll", EntryPoint = "SCardEstablishContext")]
-        static extern int SCardEstablishContextImport(int dwScope, int pvReserved1, int pvReserved2, ref int phContext);
+        static extern int SCardEstablishContextImport(int dwScope, int pvReserved1, int pvReserved2, ref IntPtr phContext);
         [DllImport("winscard.dll", EntryPoint = "SCardConnectA")]
-        static extern int SCardConnectImport(int hContext, string szReaderName, int dwShareMode, int dwPrefProtocol, ref int phCard, ref int ActiveProtocol);
+        static extern int SCardConnectImport(IntPtr hContext, string szReaderName, int dwShareMode, int dwPrefProtocol, ref IntPtr phCard, ref int ActiveProtocol);
         [DllImport("winscard.dll", EntryPoint = "SCardReleaseContext")]
-        static extern int SCardReleaseContextImport(int phContext);
+        static extern int SCardReleaseContextImport(IntPtr phContext);
         [DllImport("winscard.dll", EntryPoint = "SCardBeginTransaction")]
-        static extern int SCardBeginTransactionImport(int hCard);
+        static extern int SCardBeginTransactionImport(IntPtr hCard);
         [DllImport("winscard.dll", EntryPoint = "SCardDisconnect")]
-        static extern int SCardDisconnect(int hCard, int Disposition);
+        static extern int SCardDisconnect(IntPtr hCard, int Disposition);
         [DllImport("winscard.dll", EntryPoint = "SCardListReaderGroups")]
-        static extern int SCardListReaderGroupsImport(int hContext, ref string mzGroups, ref int pcchGroups);
+        static extern int SCardListReaderGroupsImport(IntPtr hContext, ref string mzGroups, ref int pcchGroups);
         [DllImport("winscard.DLL", EntryPoint = "SCardListReadersA", CharSet = CharSet.Ansi)]
-        static extern int SCardListReadersImport(int hContext, byte[] Groups, byte[] Readers, ref int pcchReaders);
+        static extern int SCardListReadersImport(IntPtr hContext, byte[] Groups, byte[] Readers, ref int pcchReaders);
                                              //(SCARDCONTEXT hContext, LPSTR mszGroups,LPDWORD pcchGroups);
         [DllImport("winscard.dll", EntryPoint = "SCardStatusA")]
-        static extern int SCardStatusImport(int hCard, byte[] mszReaderNames, ref int pcchReaderLen, ref int pdwState, ref int pdwProtocol, byte[] pbAtr, ref int pcbAtrLen);
+        static extern int SCardStatusImport(IntPtr hCard, byte[] mszReaderNames, ref int pcchReaderLen, ref int pdwState, ref int pdwProtocol, byte[] pbAtr, ref int pcbAtrLen);
                                       //(SCARDHANDLE hCard, LPSTR mszReaderNames, LPDWORD pcchReaderLen, LPDWORD pdwState, LPDWORD pdwProtocol, LPBYTE pbAtr, LPDWORD pcbAtrLen);
         [DllImport("winscard.dll", EntryPoint = "SCardEndTransaction")]
-        static extern int SCardEndTransactionImport(int hCard, int Disposition);
+        static extern int SCardEndTransactionImport(IntPtr hCard, int Disposition);
         [DllImport("WinScard.dll", EntryPoint = "SCardTransmit")]
-        static extern int SCardTransmitImport(int hCard, ref SCARD_IO_REQUEST pioSendPci, ref byte pbSendBuffer, int cbSendLength, ref SCARD_IO_REQUEST pioRecvPci, ref byte pbRecvBuffer, ref int pcbRecvLength);
+        static extern int SCardTransmitImport(IntPtr hCard, ref SCARD_IO_REQUEST pioSendPci, ref byte pbSendBuffer, int cbSendLength, ref SCARD_IO_REQUEST pioRecvPci, ref byte pbRecvBuffer, ref int pcbRecvLength);
         [DllImport("winscard.dll", EntryPoint = "SCardControl")]
-        static extern int SCardControlImport(int hCard, uint dwControlCode, ref byte SendBuff, int SendBuffLen, ref byte RecvBuff, int RecvBuffLen, ref int pcbBytesReturned);
+        static extern int SCardControlImport(IntPtr hCard, uint dwControlCode, ref byte SendBuff, int SendBuffLen, ref byte RecvBuff, int RecvBuffLen, ref int pcbBytesReturned);
         [DllImport("winscard.dll", EntryPoint = "SCardGetStatusChangeA", CharSet = CharSet.Ansi)]
-        static extern int SCardGetStatusChangeImport(int hContext, int dwTime, ref SCARD_READERSTATE rgReaderState, int cReaders);
+        static extern int SCardGetStatusChangeImport(IntPtr hContext, int dwTime, ref SCARD_READERSTATE rgReaderState, int cReaders);
         //                                  (int hContext, int dwTime, SCARDREADER_STATE rgReaderState, int cReaders)
         [DllImport("winscard.dll", EntryPoint = "SCardGetAttrib")]
-        static extern int SCardGetAttribImport(int hCard, int dwAttrId, byte[] pbAttr, ref int pcbAttrLen);
+        static extern int SCardGetAttribImport(IntPtr hCard, int dwAttrId, byte[] pbAttr, ref int pcbAttrLen);
                                     //(SCARDHANDLE hCard, DWORD dwAttrId, LPBYTE pbAttr, LPDWORD pcbAttrLen);
          
         /// <summary>
@@ -100,7 +100,7 @@ namespace NFC_CardReader.WinSCard
         /// <param name="Scope">Scope</param>
         /// <param name="Context">Context</param>
         /// <returns>The Error Code</returns>
-        internal static ErrorCodes SCardEstablishContext(OperationScopes Scope, ref int Context)
+        internal static ErrorCodes SCardEstablishContext(OperationScopes Scope, ref IntPtr Context)
         {
             return (ErrorCodes)SCardEstablishContextImport((int)Scope, 0, 0, ref Context);
         }
@@ -110,7 +110,7 @@ namespace NFC_CardReader.WinSCard
         /// </summary>
         /// <param name="Context">Context</param>
         /// <returns>The Error Code</returns>
-        internal static ErrorCodes SCardReleaseContext(int Context)
+        internal static ErrorCodes SCardReleaseContext(IntPtr Context)
         {
             return (ErrorCodes)SCardReleaseContextImport(Context);
         }
@@ -125,7 +125,7 @@ namespace NFC_CardReader.WinSCard
         /// <param name="Card">The Card</param>
         /// <param name="ActiveProtocol">The Active protocol</param>
         /// <returns>The Error Code</returns>
-        internal static ErrorCodes SCardConnect(int Context, string ReaderName, SmartCardShareTypes ShareMode, SmartCardProtocols Protocol, ref int Card, ref int ActiveProtocol)
+        internal static ErrorCodes SCardConnect(IntPtr Context, string ReaderName, SmartCardShareTypes ShareMode, SmartCardProtocols Protocol, ref IntPtr Card, ref int ActiveProtocol)
         {
             return (ErrorCodes)SCardConnectImport(Context, ReaderName, (int)ShareMode, (int)Protocol, ref Card, ref ActiveProtocol);
         }
@@ -135,7 +135,7 @@ namespace NFC_CardReader.WinSCard
         /// </summary>
         /// <param name="Card">The Card</param>
         /// <returns></returns>
-        internal static ErrorCodes SCardBeginTransaction(int Card)
+        internal static ErrorCodes SCardBeginTransaction(IntPtr Card)
         {
             return (ErrorCodes)SCardBeginTransactionImport(Card);
         }
@@ -146,7 +146,7 @@ namespace NFC_CardReader.WinSCard
         /// <param name="Card">The Card</param>
         /// <param name="Disposition"></param>
         /// <returns></returns>
-        internal static ErrorCodes SCardDisconnect(int Card, SmartCardDispostion Disposition)
+        internal static ErrorCodes SCardDisconnect(IntPtr Card, SmartCardDispostion Disposition)
         {
             return (ErrorCodes)SCardDisconnect(Card, (int)Disposition);
         }
@@ -158,7 +158,7 @@ namespace NFC_CardReader.WinSCard
         /// <param name="Groups"></param>
         /// <param name="pcchGroups"></param>
         /// <returns></returns>
-        internal static ErrorCodes SCardListReaderGroups(int Context, ref string Groups, ref int pcchGroups)
+        internal static ErrorCodes SCardListReaderGroups(IntPtr Context, ref string Groups, ref int pcchGroups)
         {
             return (ErrorCodes)SCardListReaderGroupsImport(Context, ref Groups, ref pcchGroups);
         }
@@ -171,7 +171,7 @@ namespace NFC_CardReader.WinSCard
         /// <param name="Readers"></param>
         /// <param name="pcchReaders"></param>
         /// <returns></returns>
-        internal static ErrorCodes SCardListReaders(int Context, byte[] Groups, byte[] Readers, ref int ReaderCountOut)
+        internal static ErrorCodes SCardListReaders(IntPtr Context, byte[] Groups, byte[] Readers, ref int ReaderCountOut)
         {
             return (ErrorCodes)SCardListReadersImport(Context, Groups, Readers, ref ReaderCountOut);
         }
@@ -187,7 +187,7 @@ namespace NFC_CardReader.WinSCard
         /// <param name="ATR"></param>
         /// <param name="ATRLen"></param>
         /// <returns></returns>
-        internal static ErrorCodes SCardStatus(int Card, byte[] ReaderName, ref int ReaderLength, ref SmartCardStatus Status, ref SmartCardProtocols Protocol, byte[] ATR, ref int ATRLen)
+        internal static ErrorCodes SCardStatus(IntPtr Card, byte[] ReaderName, ref int ReaderLength, ref SmartCardStatus Status, ref SmartCardProtocols Protocol, byte[] ATR, ref int ATRLen)
         {
             int StatusReturn = 0;
             int ProtocolReturn = 0;
@@ -203,7 +203,7 @@ namespace NFC_CardReader.WinSCard
         /// <param name="Card">The Card</param>
         /// <param name="Disposition"></param>
         /// <returns></returns>
-        internal static ErrorCodes SCardEndTransaction(int Card, SmartCardDispostion Disposition)
+        internal static ErrorCodes SCardEndTransaction(IntPtr Card, SmartCardDispostion Disposition)
         {
             return (ErrorCodes)SCardEndTransactionImport(Card, (int)Disposition);
         }
@@ -219,7 +219,7 @@ namespace NFC_CardReader.WinSCard
         /// <param name="pbRecvBuffer"></param>
         /// <param name="pcbRecvLength"></param>
         /// <returns></returns>
-        internal static ErrorCodes SCardTransmit(int Card, ref SCARD_IO_REQUEST pioSendPci, ref byte pbSendBuffer, int cbSendLength, ref SCARD_IO_REQUEST pioRecvPci, ref byte pbRecvBuffer, ref int pcbRecvLength)
+        internal static ErrorCodes SCardTransmit(IntPtr Card, ref SCARD_IO_REQUEST pioSendPci, ref byte pbSendBuffer, int cbSendLength, ref SCARD_IO_REQUEST pioRecvPci, ref byte pbRecvBuffer, ref int pcbRecvLength)
         {
             return (ErrorCodes)SCardTransmitImport(Card, ref pioSendPci, ref pbSendBuffer, cbSendLength, ref pioRecvPci, ref pbRecvBuffer, ref pcbRecvLength);
         }
@@ -235,7 +235,7 @@ namespace NFC_CardReader.WinSCard
         /// <param name="RecvBuffLen"></param>
         /// <param name="pcbBytesReturned"></param>
         /// <returns></returns>
-        internal static ErrorCodes SCardControl(int Card, uint dwControlCode, byte[] SendBuff, ref byte[] RecvBuff, ref int pcbBytesReturned)
+        internal static ErrorCodes SCardControl(IntPtr Card, uint dwControlCode, byte[] SendBuff, ref byte[] RecvBuff, ref int pcbBytesReturned)
         {
             return (ErrorCodes)SCardControlImport(Card, dwControlCode, ref SendBuff[0], SendBuff.Length, ref RecvBuff[0], RecvBuff.Length, ref pcbBytesReturned);
         }
@@ -248,7 +248,7 @@ namespace NFC_CardReader.WinSCard
         /// <param name="ReaderState"></param>
         /// <param name="ReaderCount"></param>
         /// <returns></returns>
-        internal static ErrorCodes SCardGetStatusChange(int Context, int TimeOut, ref ReadersCurrentState[] ReaderStates, int ReaderCount)
+        internal static ErrorCodes SCardGetStatusChange(IntPtr Context, int TimeOut, ref ReadersCurrentState[] ReaderStates, int ReaderCount)
         {
             SCARD_READERSTATE[] UnsafeReaderStates = ReaderStates.ToSCARD_READERSTATE();
             ErrorCodes Return = (ErrorCodes)SCardGetStatusChangeImport(Context, TimeOut, ref UnsafeReaderStates[0], ReaderCount);
@@ -264,7 +264,7 @@ namespace NFC_CardReader.WinSCard
         /// <param name="AttrOut"></param>
         /// <param name="AttrLen"></param>
         /// <returns></returns>
-        internal static ErrorCodes SCardGetAttrib(int Card, SmartCardATR Attribute, byte[] AttrOut, ref int AttrLen)
+        internal static ErrorCodes SCardGetAttrib(IntPtr Card, SmartCardATR Attribute, byte[] AttrOut, ref int AttrLen)
         { 
             return (ErrorCodes)SCardGetAttribImport(Card, (int)Attribute, AttrOut, ref AttrLen);
         }

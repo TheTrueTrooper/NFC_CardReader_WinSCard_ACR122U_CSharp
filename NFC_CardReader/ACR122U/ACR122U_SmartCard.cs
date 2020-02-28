@@ -21,7 +21,7 @@ namespace NFC_CardReader.ACR122U
         public ACR122U_SmartCard(WinSmartCard MakeFrom) : this(MakeFrom.Parent, MakeFrom.Card)
         {}
 
-        ACR122U_SmartCard(WinSmartCardContext Parent, int Card) : base(Parent, Card)
+        ACR122U_SmartCard(WinSmartCardContext Parent, IntPtr Card) : base(Parent, Card)
         {}
 
         #region DeviceUtilities

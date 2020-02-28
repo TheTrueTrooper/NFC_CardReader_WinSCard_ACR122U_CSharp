@@ -16,12 +16,12 @@ namespace NFC_CardReader.WinSCard
         /// <summary>
         /// A Pointer to the card as an int since C# doesn't really directly reference it
         /// </summary>
-        int _Card;
+        IntPtr _Card;
 
         /// <summary>
         /// Getting a Pointer to the card as an int for internal use; since C# doesn't really directly reference it
         /// </summary>
-        internal int Card { get { return _Card; } }
+        internal IntPtr Card { get { return _Card; } }
 
         /// <summary>
         /// Is this card locked for a transaction
@@ -65,7 +65,7 @@ namespace NFC_CardReader.WinSCard
         /// </summary>
         /// <param name="Parent"></param>
         /// <param name="Card"></param>
-        internal WinSmartCard(WinSmartCardContext Parent, int Card)
+        internal WinSmartCard(WinSmartCardContext Parent, IntPtr Card)
         {
             this.Parent = Parent;
             _Card = Card;
