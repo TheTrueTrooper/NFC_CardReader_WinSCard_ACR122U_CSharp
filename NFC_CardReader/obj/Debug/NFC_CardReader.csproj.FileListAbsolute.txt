@@ -6,7 +6,7 @@ C:\Users\Angelo's Tower PC\source\repos\NFC_CardReader\NFC_CardReader\obj\Debug\
 C:\Users\Angelo's Tower PC\source\repos\NFC_CardReader\NFC_CardReader\obj\Debug\NFC_CardReader.csprojAssemblyReference.cache
 C:\Users\Angelo's Tower PC\source\repos\NFC_CardReader_WinSCard_ACR122U_CSharp\NFC_CardReader\bin\Debug\NFC_CardReader.dll
 C:\Users\Angelo's Tower PC\source\repos\NFC_CardReader_WinSCard_ACR122U_CSharp\NFC_CardReader\bin\Debug\NFC_CardReader.pdb
-C:\Users\Angelo's Tower PC\source\repos\NFC_CardReader_WinSCard_ACR122U_CSharp\NFC_CardReader\obj\Debug\NFC_CardReader.csprojAssemblyReference.cache
 C:\Users\Angelo's Tower PC\source\repos\NFC_CardReader_WinSCard_ACR122U_CSharp\NFC_CardReader\obj\Debug\NFC_CardReader.csproj.CoreCompileInputs.cache
 C:\Users\Angelo's Tower PC\source\repos\NFC_CardReader_WinSCard_ACR122U_CSharp\NFC_CardReader\obj\Debug\NFC_CardReader.dll
 C:\Users\Angelo's Tower PC\source\repos\NFC_CardReader_WinSCard_ACR122U_CSharp\NFC_CardReader\obj\Debug\NFC_CardReader.pdb
+C:\Users\Angelo's Tower PC\source\repos\NFC_CardReader_WinSCard_ACR122U_CSharp\NFC_CardReader\obj\Debug\NFC_CardReader.csprojAssemblyReference.cache

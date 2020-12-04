@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using NFC_CardReader;
 using NFC_CardReader.ACR122U;
+using NFC_CardReader.ACR122U.CardTypes.MifareClassic;
 using NFC_CardReader.ACR122UManager;
 using System.IO;
 using NFC_CardReader.WinSCard;
@@ -285,17 +286,219 @@ using NFC_CardReader.WinSCard;
 
 //Console.ReadKey();
 #endregion
+#region NFCMaifareClassicTesting
+//namespace CardReader_TestFileLogger
+//{
+//    class Program
+//    {
+//        static void Main(string[] args)
+//        {
+//            byte[] AcceptedATR = new byte[] { 0x3B, 0x8F, 0x80, 0x01, 0x80, 0x4F, 0x0C, 0xA0, 0x00, 0x00, 0x03, 0x06, 0x03, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x6A };
+//            ACR122UManager Manager = new ACR122UManager(ACR122UManager.GetACR122UReaders().FirstOrDefault());
+//            //
+//            ACR122U_MifareClassic_Status Status;
+//            Manager.GetStatus(out Status);
+//            //
+//            ACR122U_PICCOperatingParametersControl ControlOptions = ACR122U_PICCOperatingParametersControl.AllOn;
+//            Manager.SetPICCOperatingParameterState(ref ControlOptions);
+//            //
+//            Console.WriteLine("PIC options:\n" + ControlOptions);
+//            Console.WriteLine("Starting Status:\n\tCard: " + Status.Card + "\n\tError: " + Status.ErrorCode);
+//            //
+//            ACR122UManager.GlobalCardCheck = (e) =>
+//            {
+//                bool CeckSuccess = false;
+//                if (e.ATR.Length == AcceptedATR.Length)
+//                {
+//                    CeckSuccess = true;
+//                    for (int i = 0; i < e.ATR.Length; i++)
+//                    {
+//                        if (e.ATR[i] != AcceptedATR[i])
+//                        {
+//                            CeckSuccess = false;
+//                            break;
+//                        }
+//                    }
+//                }
+//                return CeckSuccess;
+//            };
 
+//            Manager.CheckCard = true;
+
+//            ManagerTest Test = new ManagerTest(Manager);
+
+//            Manager.AcceptedCardScaned += Test.TestAccept;
+//            Manager.CardStateChanged += Test.TestStateChange;
+//            Manager.RejectedCardScaned += Test.TestRejected;
+//            Manager.CardDetected += Test.TestCardDetected;
+//            Manager.CardRemoved += Test.TestCardRemoved;
+//            List<string> Names = WinSmartCardContext.ListReadersAsStringsStatic();
+//            Console.ReadKey();
+
+//        }
+
+//        static class FileLogger
+//        {
+//            static readonly string Location = Environment.CurrentDirectory + "\\CardReaderOutput.txt";
+
+//            public static void WriteLine(string Write)
+//            {
+//                using (StreamWriter SW = new StreamWriter(File.Open(Location, FileMode.Append)))
+//                {
+//                    SW.WriteLine(Write);
+//                }
+//            }
+
+//            public static void WriteLine(string Write, params object[] obj)
+//            {
+//                using (StreamWriter SW = new StreamWriter(File.Open(Location, FileMode.Append)))
+//                {
+//                    SW.WriteLine(string.Format(Write, obj));
+//                }
+//            }
+
+//        }
+
+//        public class ManagerTest
+//        {
+
+//            ACR122UManager Manager;
+
+//            public ManagerTest(ACR122UManager M)
+//            {
+//                Manager = M;
+//            }
+
+//            public void TestStateChange(object sender, ACRCardStateChangeEventArg e)
+//            {
+//                Console.WriteLine("CardReaders state has changed");
+//                Console.WriteLine("State Enum : {0}", e.EventState);
+//                Console.WriteLine("State as Hex : {0:x}", (int)e.EventState);
+//                Console.WriteLine("ATR : {0}", e.ATRString);
+//            }
+
+//            public void TestAccept(object sender, ACRCardAcceptedCardScanEventArg e)
+//            {
+//                Console.WriteLine("CardReader has accepted Card");
+//                Console.WriteLine("State Enum : {0}", e.EventState);
+//                Console.WriteLine("State as Hex : {0:x}", (int)e.EventState);
+//                Console.WriteLine("ATR : {0}", e.ATRString);
+
+//                if (Manager.Card == null)
+//                {
+//                    #region BasicConnect
+//                    ACR122U_MifareClassic_SmartCard Card = Manager.ConnectToMifareClassicCard();
+//                    Console.WriteLine("\tCard Conneted");
+//                    Console.WriteLine("\tUDI: " + Card.GetcardUID());
+//                    #endregion
+
+//                    #region ValueTesting
+//                    byte[] Data;
+//                    Console.WriteLine("\tLoading athentication Keys to Key Memory 1: 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF");
+//                    Card.LoadAthenticationKeys(ACR122U_KeyMemories.Key1, new byte[6] { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF });
+//                    Console.WriteLine("\tAthentication Key B (Read/Write Key) to Key Memory 1: ");
+//                    Card.Athentication(5, ACR122U_Keys.KeyB, ACR122U_KeyMemories.Key1);
+//                    Console.WriteLine("\tAttempting to write block 5 (sector 1, block 1) All 0xFF: ");
+//                    Card.WriteBlock(new byte[16] { 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF }, 5);
+//                    Console.WriteLine("\tAttempting to read block 5 (sector 1, block 1): ");
+//                    Card.ReadBlock(out Data, 5);
+//                    Console.WriteLine("\tData: " + BitConverter.ToString(Data));
+//                    Console.WriteLine("\tAttempting to write block 5 (sector 1, block 1) All 0x00: ");
+//                    Card.WriteBlock(new byte[16] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }, 5);
+//                    Console.WriteLine("\tAttempting to read block 5 (sector 1, block 1): ");
+//                    Card.ReadBlock(out Data, 5);
+//                    Console.WriteLine("\tData: " + BitConverter.ToString(Data));
+//                    #endregion
+
+//                    #region Values
+//                    Int32 Data2;
+//                    Console.WriteLine("\tAttempting to write value to block 5 (sector 1, block 1) Value = 5: ");
+//                    Card.WriteValueToBlock(5, 5);
+//                    Console.WriteLine("\tAttempting to read value from block 5 (sector 1, block 1) Value ?= 5: ");
+//                    Card.ReadValueFromBlock(out Data2, 5);
+//                    Console.WriteLine("\t\tData: " + Data2);
+
+//                    Console.WriteLine("\tAttempting to write value to block 5 (sector 1, block 1) Value = 0: ");
+//                    Card.WriteValueToBlock(0, 5);
+//                    Console.WriteLine("\tAttempting to read value from block 5 (sector 1, block 1) Value ?= 0: ");
+//                    Card.ReadValueFromBlock(out Data2, 5);
+//                    Console.WriteLine("\t\tData: " + Data2);
+
+//                    Console.WriteLine("\tAttempting to increment value at block 5 (sector 1, block 1): ");
+//                    Card.IncrementValue(1, 5);
+//                    Console.WriteLine("\tAttempting to read value from block 5 (sector 1, block 1) Value ?= 1: ");
+//                    Card.ReadValueFromBlock(out Data2, 5);
+//                    Console.WriteLine("\t\tData: " + Data2);
+
+//                    Console.WriteLine("\tAttempting to decrement value at block 5 block 5 (sector 1, block 1): ");
+//                    Card.DecrementValue(1, 5);
+//                    Console.WriteLine("\tAttempting to read value from block 5 (sector 1, block 1) Value ?= 0: ");
+//                    Card.ReadValueFromBlock(out Data2, 5);
+//                    Console.WriteLine("\t\tData: " + Data2);
+
+//                    Console.WriteLine("\tAttempting to increment value at block 5 (sector 1, block 1): ");
+//                    Card.IncrementValue(1, 5);
+//                    Console.WriteLine("\tAttempting to read value from block 5 (sector 1, block 1) Value ?= 1: ");
+//                    Card.ReadValueFromBlock(out Data2, 5);
+//                    Console.WriteLine("\t\tData: " + Data2);
+
+//                    Console.WriteLine("\tAttempting to copy value at block 5 to block 4 (sector 1, block 1 => sector 1, block 0): ");
+//                    Card.Copy(5, 4);
+//                    Console.WriteLine("\tAttempting to read value from block 5 (sector 1, block 1) Value: ");
+//                    Card.ReadValueFromBlock(out Data2, 5);
+//                    Console.WriteLine("\t\tData: " + Data2);
+
+//                    Console.WriteLine("\tAttempting to read value from block 4 (sector 1, block 1) Value[4] ?= Value[5]: ");
+//                    Card.ReadValueFromBlock(out Data2, 4);
+//                    Console.WriteLine("\t\tData: " + Data2);
+//                    #endregion
+
+//                    Manager.DisconnectToCard();
+
+//                }
+
+//            }
+
+//            public void TestRejected(object sender, ACRCardRejectedCardScanEventArg e)
+//            {
+//                Console.WriteLine("CardReader has rejected Card");
+//                Console.WriteLine("State Enum : {0}", e.EventState);
+//                Console.WriteLine("State as Hex : {0:x}", (int)e.EventState);
+//                Console.WriteLine("ATR : {0}", e.ATRString);
+//            }
+
+//            public void TestCardDetected(object sender, ACRCardDetectedEventArg e)
+//            {
+//                Console.WriteLine("CardReader has detected Card");
+//                Console.WriteLine("State Enum : {0}", e.EventState);
+//                Console.WriteLine("State as Hex : {0:x}", (int)e.EventState);
+//                Console.WriteLine("ATR : {0}", e.ATRString);
+//            }
+
+//            public void TestCardRemoved(object sender, ACRCardRemovedEventArg e)
+//            {
+//                Console.WriteLine("CardReader has removed Card");
+//                Console.WriteLine("State Enum : {0}", e.EventState);
+//                Console.WriteLine("State as Hex : {0:x}", (int)e.EventState);
+//                Console.WriteLine("ATR : {0}", e.ATRString);
+
+//                //Manager.DisconnectToCard();
+//            }
+//        }
+
+//    }
+//}
+#endregion
 namespace CardReader_TestFileLogger
 {
     class Program
     {
         static void Main(string[] args)
         {
-            byte[] AcceptedATR = new byte[] { 0x3B, 0x8F, 0x80, 0x01, 0x80, 0x4F, 0x0C, 0xA0, 0x00, 0x00, 0x03, 0x06, 0x03, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x6A };
+            byte[] AcceptedATR = new byte[] { 0x3B, 0x8F, 0x80, 0x01, 0x80, 0x4F, 0x0C, 0xA0, 0x00, 0x00, 0x03, 0x06, 0x03, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00, 0x68 };
             ACR122UManager Manager = new ACR122UManager(ACR122UManager.GetACR122UReaders().FirstOrDefault());
             //
-            ACR122U_Status Status;
+            ACR122U_MifareClassic_Status Status;
             Manager.GetStatus(out Status);
             //
             ACR122U_PICCOperatingParametersControl ControlOptions = ACR122U_PICCOperatingParametersControl.AllOn;
@@ -383,78 +586,16 @@ namespace CardReader_TestFileLogger
                 Console.WriteLine("State as Hex : {0:x}", (int)e.EventState);
                 Console.WriteLine("ATR : {0}", e.ATRString);
 
+
                 if (Manager.Card == null)
                 {
-                    #region BasicConnect
-                    Manager.ConnectToCard();
-                    Console.WriteLine("\tCard Conneted");
-                    Console.WriteLine("\tUDI: " + Manager.GetCardUID());
-                    #endregion
-
-                    #region ValueTesting
-                    byte[] Data;
-                    Console.WriteLine("\tLoading athentication Keys to Key Memory 1: 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF");
-                    Manager.LoadAthenticationKeys(ACR122U_KeyMemories.Key1, new byte[6] { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF });
-                    Console.WriteLine("\tAthentication Key B (Read/Write Key) to Key Memory 1: ");
-                    Manager.Athentication(5, ACR122U_Keys.KeyB, ACR122U_KeyMemories.Key1);
-                    Console.WriteLine("\tAttempting to write block 5 (sector 1, block 1) All 0xFF: ");
-                    Manager.WriteBlock(new byte[16] { 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF }, 5);
-                    Console.WriteLine("\tAttempting to read block 5 (sector 1, block 1): ");
-                    Manager.ReadBlock(out Data, 5);
-                    Console.WriteLine("\tData: " + BitConverter.ToString(Data));
-                    Console.WriteLine("\tAttempting to write block 5 (sector 1, block 1) All 0x00: ");
-                    Manager.WriteBlock(new byte[16] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }, 5);
-                    Console.WriteLine("\tAttempting to read block 5 (sector 1, block 1): ");
-                    Manager.ReadBlock(out Data, 5);
-                    Console.WriteLine("\tData: " + BitConverter.ToString(Data));
-                    #endregion
-
-                    #region Values
-                    Int32 Data2;
-                    Console.WriteLine("\tAttempting to write value to block 5 (sector 1, block 1) Value = 5: ");
-                    Manager.WriteValueToBlock(5, 5);
-                    Console.WriteLine("\tAttempting to read value from block 5 (sector 1, block 1) Value ?= 5: ");
-                    Manager.ReadValueFromBlock(out Data2, 5);
-                    Console.WriteLine("\t\tData: " + Data2);
-
-                    Console.WriteLine("\tAttempting to write value to block 5 (sector 1, block 1) Value = 0: ");
-                    Manager.WriteValueToBlock(0, 5);
-                    Console.WriteLine("\tAttempting to read value from block 5 (sector 1, block 1) Value ?= 0: ");
-                    Manager.ReadValueFromBlock(out Data2, 5);
-                    Console.WriteLine("\t\tData: " + Data2);
-
-                    Console.WriteLine("\tAttempting to increment value at block 5 (sector 1, block 1): ");
-                    Manager.IncrementValue(1, 5);
-                    Console.WriteLine("\tAttempting to read value from block 5 (sector 1, block 1) Value ?= 1: ");
-                    Manager.ReadValueFromBlock(out Data2, 5);
-                    Console.WriteLine("\t\tData: " + Data2);
-
-                    Console.WriteLine("\tAttempting to decrement value at block 5 block 5 (sector 1, block 1): ");
-                    Manager.DecrementValue(1, 5);
-                    Console.WriteLine("\tAttempting to read value from block 5 (sector 1, block 1) Value ?= 0: ");
-                    Manager.ReadValueFromBlock(out Data2, 5);
-                    Console.WriteLine("\t\tData: " + Data2);
-
-                    Console.WriteLine("\tAttempting to increment value at block 5 (sector 1, block 1): ");
-                    Manager.IncrementValue(1, 5);
-                    Console.WriteLine("\tAttempting to read value from block 5 (sector 1, block 1) Value ?= 1: ");
-                    Manager.ReadValueFromBlock(out Data2, 5);
-                    Console.WriteLine("\t\tData: " + Data2);
-
-                    Console.WriteLine("\tAttempting to copy value at block 5 to block 4 (sector 1, block 1 => sector 1, block 0): ");
-                    Manager.Copy(5, 4);
-                    Console.WriteLine("\tAttempting to read value from block 5 (sector 1, block 1) Value: ");
-                    Manager.ReadValueFromBlock(out Data2, 5);
-                    Console.WriteLine("\t\tData: " + Data2);
-
-                    Console.WriteLine("\tAttempting to read value from block 4 (sector 1, block 1) Value[4] ?= Value[5]: ");
-                    Manager.ReadValueFromBlock(out Data2, 4);
-                    Console.WriteLine("\t\tData: " + Data2);
-                    #endregion
-
+                    ACR122U_NTAG215_SmartCard Card = Manager.ConnectToNTAGCard();
+                    byte[] receivedUID = null;
+                    Console.WriteLine(Card.GetcardUIDBytes(out receivedUID));
+                    Console.WriteLine(BitConverter.ToString(receivedUID));
                     Manager.DisconnectToCard();
-
                 }
+                
 
             }
 

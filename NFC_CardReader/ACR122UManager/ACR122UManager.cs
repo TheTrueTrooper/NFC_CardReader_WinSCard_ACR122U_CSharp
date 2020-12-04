@@ -1,4 +1,5 @@
 ﻿using NFC_CardReader.ACR122U;
+using NFC_CardReader.ACR122U.CardTypes.MifareClassic;
 using NFC_CardReader.WinSCard;
 using System;
 using System.Collections.Generic;
@@ -126,15 +127,23 @@ namespace NFC_CardReader.ACR122UManager
         }
 
         #region ConnectingCalls
+
         /// <summary>
-        /// The use to connect with card and use.
+        /// The use to connect with a Mifare Classic card and use.
         /// </summary>
-        public void ConnectToCard()
+        public ACR122U_MifareClassic_SmartCard ConnectToMifareClassicCard()
         {
-            //Context.Dispose();
-            //Context = null;
-            //Context = new WinSmartCardContext(OperationScopes.SCARD_SCOPE_SYSTEM, ReaderName);
-            Card = new ACR122U_SmartCard(Context.CardConnect(SmartCardShareTypes.SCARD_SHARE_SHARED));
+            Card = new ACR122U_MifareClassic_SmartCard(Context.CardConnect(SmartCardShareTypes.SCARD_SHARE_SHARED));
+            return (ACR122U_MifareClassic_SmartCard)Card;
+        }
+
+        /// <summary>
+        /// The use to connect with a NTAG (init 215) card and use.
+        /// </summary>
+        public ACR122U_NTAG215_SmartCard ConnectToNTAGCard()
+        {
+            Card = new ACR122U_NTAG215_SmartCard(Context.CardConnect(SmartCardShareTypes.SCARD_SHARE_SHARED));
+            return (ACR122U_NTAG215_SmartCard)Card;
         }
 
         /// <summary>
@@ -303,7 +312,7 @@ namespace NFC_CardReader.ACR122UManager
         /// Gets the Status from the ACR122 using its internal method
         /// </summary>
         /// <param name="ACR122U_Status">A container with all of the status</param>
-        public void GetStatus(out ACR122U_Status ACR122U_Status)
+        public void GetStatus(out ACR122U_MifareClassic_Status ACR122U_Status)
         {
             ACR122U_ResposeErrorCodes Error;
             if (this.Card == null)
@@ -317,6 +326,7 @@ namespace NFC_CardReader.ACR122UManager
 
         #region MafireClassics
         #region Utilities
+        /*
         /// <summary>
         /// Gets the Cards UID as bytes
         /// </summary>
@@ -553,6 +563,7 @@ namespace NFC_CardReader.ACR122UManager
             if (Error != ACR122U_ResposeErrorCodes.Success)
                 throw new ACR122U_SmartCardException(Error, ErrorCodes.SCARD_S_SUCCESS);
         }
+        */
         #endregion
         #endregion
 

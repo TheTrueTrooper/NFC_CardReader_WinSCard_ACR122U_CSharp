@@ -53,6 +53,10 @@
     <Compile Include="ACR122U\ACR122U_ResposeErrorCodes.cs" />
     <Compile Include="ACR122U\ACR122U_SmartCardException.cs" />
     <Compile Include="ACR122U\ACR122U_Status.cs" />
+    <Compile Include="ACR122U\CardTypes\ACR122U_SupportedRFCardTypes.cs" />
+    <Compile Include="ACR122U\CardTypes\ACR122U_ISO14443TypeAStandard_SmartCard.cs" />
+    <Compile Include="ACR122U\CardTypes\MifareClassic\ACR122U_MifareClassic_SmartCard.cs" />
+    <Compile Include="ACR122U\CardTypes\MifareClassic\ACR122U_NTAG215_SmartCard.cs" />
     <Compile Include="ACR122U\ControlEnums\ACR122U_KeyNumbers.cs" />
     <Compile Include="ACR122U\ControlEnums\ACR122U_Keys.cs" />
     <Compile Include="ACR122U\ControlEnums\ACR122U_PICCOperatingParametersControl.cs" />
@@ -82,6 +86,8 @@
     <Compile Include="WinSCard\WinSmartCardContext.cs" />
     <Compile Include="WinSCard\WinscardDLLCodesAsEnums\_Notes.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="ACR122UManager\CardTypes\MifareClassic\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
